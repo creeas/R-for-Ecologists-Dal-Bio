@@ -1,0 +1,363 @@
+---
+title: "Introduction to plotting and ggplot"
+author: 'null'
+date: 'null'
+output:
+  html_document:
+    depth: 5
+    highlight: pygments
+    number_sections: no
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+subtitle: Vancouver Aquarium - Oceanwise
+---
+
+#Introduction to plotting and ggplot
+
+##What we will cover today
+The goals of today will be to cover a quick refresher of plotting in base that was covered on Day 1 and to learn a few more advanced skills such as faceting, creating custom themes for rapid duplication, and multipanel plots. We will cover these topics in base and the ggplot2 package. Ggplot is part of the tidyverse and relted to the data wrangling that we covered this morning. After today you should have an understanding of the basic grammar of ggplot (data, geoms, aesthetics, and facets) and be comfortable with generating quick exploratory plots and learn the tools to start developing more customized vizualizations.
+
+##Refresher for baseplot
+We already covered simple base plotting in our first lesson, but let's refresh. Baseplot are the plotting functions that come pre-installed in R and do not require additional packages. They are very powerful on their own ans can generate a range of the most commonly used plots, or used to create custom plots and diagrams. Most aspects of plots can be adjusted within the plot function themselves or by using the extensive list of parameters in `par()`.
+
+```{r base plot refresher, echo=FALSE}
+abalone <- read.csv("Data/abalone.csv")
+head(abalone)
+
+
+#BASIC PLOTTING
+names(abalone)
+
+#plot(x, y, data)
+plot(abalone$Rings, abalone$Length)
+
+#change the points to be filled in, pch = point character
+plot(abalone$Rings, abalone$Length, pch = 19) #plot(x,y) plot(y~x)
+
+#change the colour, size, and transparency
+col=adjustcolor("grey50", alpha=0.2)
+
+plot(abalone$Rings, abalone$Length, pch = 19, col= adjustcolor("red", alpha = 0.5), 
+     cex=1.5)
+
+#change the x and y axis labels and customize the y axis 
+plot(abalone$Rings, abalone$Length, pch = 19, col= col, 
+     cex=2, xlab = "Rings", ylab = "Length")
+
+#plot a line of best fit ontop
+abline(h=0.8, col= "black", lwd = 3, lty=2)
+
+abline(0.2, 0.0005, col="red", lty=2, lwd=2)
+
+#plot a regression line
+?lm
+lm<-lm(abalone$Length~abalone$Rings)
+abline(lm, col="blue")
+abline(v = 10, col= "black", lwd = 3)
+
+#smoothed line ontop of data
+scatter.smooth(abalone$Rings, abalone$Length, pch = 19, col= col, 
+     cex=2, xlab = "Rings", ylab = "Length" , lpars =
+                    list(col = "red", lwd = 3, lty = 1))
+
+#export the image to your current working directory
+#what is your working directory?
+getwd()
+
+# 1. Open jpeg file
+jpeg("rplot.jpg", width = 1400, height = 1400)
+# 2. Create the plot
+plot(abalone$Rings, abalone$Length, pch = 19, col= col, 
+     cex=2, xlab = "Rings", ylab = "Length")
+# 3. Close the file
+dev.off() 
+
+#look at your file - the text is too small, make it bigger
+# 1. Open jpeg file
+jpeg("rplot.jpg", units = "in", res = 300, width = 7, height = 5)
+# 2. Create the plot
+par(mar = c(1,1,1,1)+4)
+par(oma = c(1,1,1,1))
+plot(abalone$Rings, abalone$Length, pch = 19, col= col, 
+     cex=2, xlab = "Rings", ylab = "Length", cex.lab = 2, cex.axis = 2)
+# 3. Close the file
+dev.off()
+
+
+#PLOT A two scatterplots on top of each other, male and female
+males <- subset(abalone, Sex == "M")
+females <- subset(abalone, Sex == "F")
+plot(Rings~Length, data = males, col="green", 
+   ylim=range(abalone$Rings), xlim = range(abalone$Length), xlab="Length",
+   ylab="Rings", cex.lab=0.8, pch = 19)
+
+points(Rings~Length, data = females, col="blue", 
+   ylim=range(abalone$Rings), xlim = range(abalone$Length), xlab="Length",
+   ylab="Rings", cex.lab=0.8, pch = 19)
+
+#BOXPLOTS
+boxplot(as.factor(abalone$Sex), abalone$Length, 
+        xlab="Sex", ylab="Length") 
+
+#pretty basic, add some colour
+boxplot(as.factor(abalone$Sex), abalone$Length,  
+   xlab="Sex", ylab="Age", 
+   col=(c("gold","darkgreen")), 
+   axes=FALSE)
+# Make x axis using Mon-Fri labels
+axis(1, at=1:2, lab=c("Females", "Males"))
+# Make y axis with horizontal labels that display ticks at 
+# every 4 marks. 4*0:max_y is equivalent to c(0,4,8,12).
+axis(2, las=1)
+box()
+
+#SEE HERE FOR REFERENCE FOR BASE PLOTTING COMMANDS:
+#https://www.statmethods.net/advgraphs/parameters.html
+
+```
+
+##Introduction to ggplot
+
+ggplot2 is an R package by Hadley Wickham and Winston Chang that implements Wilkinson's Grammar of Graphics. The emphasis of ggplot2 is on rapid exploration of data, and especially high-dimensional data. Think of base graphic functions as drawing with data (examples of base graphic functions are `plot()`, `points()`, and `lines()`. With base graphics, you have complete control over every pixel in a plot but it can take a lot of time and code to produce a plot.
+
+Good graphical displays of data require rapid iteration and lots of exploration. If it takes you hours to code a plot in base graphics, you're unlikely to throw it out and explore other ways of visualizing the data, you're unlikely to explore all the dimensions of your data, and you're unlikely to discover problems with your data or models. 
+
+Let's look at some illustrative ggplot2 code:
+
+```{r basics1}
+library(dplyr)
+library(ggplot2)
+# fake data:
+d <- data.frame(x = c(1:8, 1:8), y = runif(16),
+  group1 = rep(gl(2, 4, labels = c("a", "b")), 2),
+  group2 = gl(2, 8))
+head(d)
+ggplot(data = d, aes(x = x, y = y, colour = group1)) + geom_point() +
+  facet_grid(~group2)
+```
+
+The basic format in this example is:
+
+1.  `ggplot()`: start an object and specify the data
+
+2.  `aes()`: specifies the "aesthetic" elements; a legend is automatically created
+
+3.  `geom_point()`: we want a scatter plot; this is called a "geom"
+
+4.  `facet_grid()`: specifies the "faceting" or panel layout
+
+There are also statistics, scales, and annotation options, among others. At a minimum, you must specify the data, some aesthetics, and a geom. Faceting is useful when you want to create the same figure using subsets of your data.
+
+
+### Aesthetics
+
+Aesthetics refer to the attributes of the data you want to display. They map the data to an attribute (such as the size or shape of a symbol) and generate an appropriate legend. Aesthetics are specified with the `aes()` function.
+
+As an example, the aesthetics available for `geom_point()` are: `x`, `y`, `alpha`, `colour`, `fill`, `shape`, and `size`. Read the help files to see the aesthetic options for the geom you’re using. They’re generally self explanatory. Aesthetics can be specified within the main `ggplot()` function or within a `geom()`. If they’re specified within the main `ggplot()` function then they apply to all geoms you specify.
+
+Note the important difference between specifying characteristics like colour and shape inside or outside the `aes()` function: those inside the `aes()` function are assigned the colour or shape automatically based on the data.
+
+```{r aes1}
+ggplot(mpg, aes(cty, hwy)) + 
+  geom_point(aes(color = class, size = cyl))
+```
+
+If characteristics like color or shape are defined outside the `aes()` function, then the characteristic is not mapped to data:
+
+```{r aes2}
+ggplot(mpg, aes(cty, hwy)) + geom_point(aes(colour = cyl))
+
+```
+
+Let's play with mapping some of our data to aesthetics. 
+
+# Loading the data
+
+We're going to work with morphological data from Galapagos finches, which is available from BIRDD: Beagle Investigation Return with Darwinian Data at <http://bioquest.org/birdd/morph.php>. It is originally from Sato et al. 2000 Mol. Biol. Evol. <http://mbe.oxfordjournals.org/content/18/3/299.full>.
+
+Before we get started, we're going to clean the data up a bit. I've removed some columns and made the column names lower case. I've also removed all but one island. You can do that with this code:
+
+```{r load-data}
+morph <- read.csv("Data/Morph_for_Sato.csv", stringsAsFactors = FALSE)
+names(morph) <- tolower(names(morph)) # make columns names lowercase
+morph <- filter(morph, islandid == "Flor_Chrl") # take only one island
+morph <- select(morph, taxonorig, sex, wingl, beakh, ubeakl) # only keep these columns
+morph <- rename(morph, taxon = taxonorig)
+morph <- data.frame(na.omit(morph)) # remove all rows with any NAs to make this simple
+morph <- as_tibble(morph)
+set.seed(1)
+morph <- morph[base::sample(seq_len(nrow(morph)), 200), ] # downsample
+```
+
+Take a look at the data. There are columns for taxon, sex, wing length, beak height, and upper beak length:
+
+```{r look-data, eval=FALSE}
+morph
+glimpse(morph)
+```
+
+I'm going to map the male/female value to a colour in our scatterplot of wing length and beak height:
+
+```{r aes3}
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(colour = sex)) +
+  geom_line()
+```
+
+## Challenge 1
+
+Explore the `morph` dataset yourself by applying some aesthetics. You can see all the available aesthetics for a given geom by looking at the documentation, e.g. `?geom_point`, or at <http://docs.ggplot2.org/current/>.
+
+Try the same scatterplot but show upper beak length (`ubeakl`) with size. Write out your code in the chunks below:
+
+```{r aes1-ex}
+ # exercise
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(size=ubeakl, color=sex))
+```
+
+Try the same scatterplot but show the taxon with colour:
+
+```{r aes2-ex}
+ # exercise
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(color=taxon, size=ubeakl))
+```
+
+Try the same scatterplot but show the upper beak length with colour (note how ggplot treats `ubeakl` differently than `taxon` when it picks a colour scale -- why is that?):
+
+```{r aes3-ex}
+ # exercise
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(color=ubeakl))
+```
+
+Bonus: If you've gotten this far, try combining colour for taxon, shape for sex, and size for upper beak length. This last version is a bit silly, but it illustrates how quickly you can explore multiple dimensions with ggplot2.
+
+```{r aes4-ex}
+ # exercise
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(color=taxon, shape=sex, size = ubeakl))
+```
+
+
+## Geoms
+
+`geom` refers to a geometric object. It determines the “shape” of the plot elements. Some common geoms:
+
+`geom`              | Description
+------------------- | -----------
+`geom_point()`      | Points
+`geom_line()`       | Lines
+`geom_ribbon()`     | Ribbons, y range with continuous x values
+`geom_polygon()`    | Polygon, a filled path
+`geom_pointrange()` | Vertical line with a point in the middle
+`geom_linerange()`  | An interval represented by a vertical line
+`geom_path()`       | Connect observations in original order
+`geom_histogram()`  | Histograms
+`geom_text()`       | Text annotations
+`geom_violin()`     | Violin plot (another name for a beanplot)
+`geom_map()`        | Polygons on a map
+
+Open the ggplot2 web documentation <http://docs.ggplot2.org/> and keep it open to refer back to it throughout these exercises.
+
+First, let's experiment with some geoms using the `morph` dataset that you downloaded and cleaned up above. I'll start by setting up a basic scatterplot of beak height vs. wing length:
+
+```{r geom0}
+ggplot(morph, aes(wingl, beakh)) + geom_point()
+```
+
+### Challenge 1
+
+Try showing the distribution of wing length for male and female birds by using `geom_violin()`:
+
+```{r geom1}
+ # exercise
+ggplot(morph, aes(sex,wingl, color=sex)) +
+  geom_violin() +
+  geom_point()
+```
+
+Try showing the distribution of wing length with `geom_histogram()` (note that histograms only require an `x` aesthetic):
+
+```{r geom2}
+ # exercise
+ggplot(morph, aes(wingl)) +
+  geom_histogram(binwidth = 2)
+```
+
+Try making a boxplot with `taxon` on the x axis and `wingl` on the y axis.
+
+```{r geom3}
+ # exercise
+ggplot(morph, aes(taxon,wingl)) +
+  geom_boxplot()
+```
+
+Bonus: If you've made it this far, try flipping the axes on your previous plot so the labels are readable. (Hint: see `?coord_flip`)
+
+```{r geom4}
+ # exercise
+ggplot(morph, aes(wingl,taxon)) +
+  geom_boxplot() +
+  xlab("Wing Length") +
+  ylab("Species Name")
+  
+```
+
+And if you made it this far, try cleaning up the plots above by setting appropriate x and y axis labels. There are multiple ways to do this. Can you find 2 ways?
+
+
+
+## Define your own colours
+Colors of plots, points, and backgrounds can be set several ways using `theme_()`, `colour=`, or `scale_color_()`. We have alredy played around with setting colors according to factors in `aes()`, so lets try the others.
+
+###ggplot2::theme_()
+ggplot2 has a set of built in themes for user which control many aspects set in your function, but these can be easily repeated. See the vignette Extending ggplot2 in the help files to learn more about themes and how to develop your own custom themes.
+
+```{r themes}
+ggplot(morph, aes(wingl, beakh)) + 
+  geom_point() +
+  theme_light()
+```
+
+###Custom colors
+ggplot has lots of ways to set your colors in your plots and can be used to create palettes for discrete and continuous variables.
+
+```{r}
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(colour= sex)) +
+  scale_color_manual(name = "sex",
+                     values = c("F" = "#bf0584",
+                                  "M" = "blue")) +
+  xlab("Wing Length") +
+  ylab("Beak Height") +
+  theme_dark() 
+```
+
+
+```{r}
+ggplot(morph, aes(wingl, beakh))+
+  geom_point(aes(colour= ubeakl)) +
+  scale_color_gradient(low="blue", high="red") +
+  xlab("Wing Length")+
+  ylab("Beak Height") +
+  theme_dark() 
+```
+
+###ggplot challenge
+Can you create a plot of beak height over beak length, with different symbols for each taxon, and a color ramp for wing length? Can you create clean labels for the axes and title?
+
+```{r}
+ggplot(morph, aes(ubeakl, beakh)) +
+  geom_point(aes(shape=taxon, color=wingl)) +
+  scale_shape_manual(values = c(0:11)) +
+  scale_color_gradient(low="blue", high="red") +
+  labs(title = "My stupid graph", y="Beak Height", x="Upper Beak Length")
+```
+

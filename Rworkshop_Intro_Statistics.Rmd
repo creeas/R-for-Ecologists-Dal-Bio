@@ -1,0 +1,148 @@
+---
+title: "Introduction to Statistics in R"
+author: 'Mull'
+date: 'June 2021'
+output:
+  html_document:
+    depth: 5
+    highlight: pygments
+    number_sections: no
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+subtitle: cRash course iFisheries lab
+---
+
+# Introduction to Statistics in R 2021
+
+For this excercice we will be using the abalone dataset developed by Sam Waugh (1995) "Extending and benchmarking Cascade-Correlation", PhD thesis, Computer Science Department, University of Tasmania. This data set was used to look at predicting the age of abalone from easily gathered morphometric information. The dataset is comprised of 4177 observation of 9 variables with no missing values.
+
+```{r load abalone dataset, echo=FALSE}
+abalone <- read.csv("Data/abalone.csv")
+```
+
+## Inspect the dataset
+
+Before starting an analysis is is a great idea to inspect our data set using 'plot()', 'summary()', and 'str()' to get a sense of how the data is structured.
+
+Plotting a dataset can be really helpful for spotting patterns and doing very quick checks of your hypotheses.
+
+```{r plot(), echo=FALSE}
+plot(abalone)
+```
+
+Summary will give a quick glimpse of suuamry statistics for each column in your dataset.
+
+```{r summary(), echo=FALSE}
+summary(abalone)
+```
+
+One thing to be aware of when importing data into R is that every column gets assigned to a certain 'class' depending on the values. These can have an effects on the performance of plotting and analyses down the line, so it's important to check if you have a factor-level variable that R has properly assigned this. NOTE: the assignments can vary when using base::read.csv VS readr::read_csv. So always check the dataframe structure.
+
+
+How can we check the class of each variable in our dataset?
+```{r str(), echo=FALSE}
+
+```
+
+## Normailty Testing
+
+Normailty testing can be done by visually assessing the spread of your data using a density plot, but for a more rigorous approach you can carry out an explicit test of normality, such as the Shapiro-Wilk's test.
+
+
+```{r normality}
+plot(density(abalone$Length))
+
+plot(density(abalone$Rings))
+
+shapiro.test(abalone$Length)
+```
+
+
+## Correlation
+Correlation tests for a link between two paired *continuous* variables. The strength of this link is represented by the correlation coefficient r, which is bound be -1 and 1. This can be carried out in R using the function cor.test(). You can learn more about the correlation function using `?cor.test`. Remember that correlation does NOT imply causation! Two variable can be correlated that are not truely related.
+
+```{r correlation test, echo=FALSE}
+?cor.test
+
+cor.test(abalone$Length, abalone$Height)
+
+cor.test(abalone$Length, abalone$WholeWeight)
+```
+
+Are these traits correlated? What does the p-value explicity tell us here?
+
+Challenge: Is length more strongly correlated to diameter or age? 
+
+```{r correlation challenge, echo=FALSE}
+#excercise
+```
+
+
+Is length correlated with X? Is there any problem with this?
+
+```{r spurious correlation}
+#excercise
+```
+
+
+## T-test
+T-test is useful for testing for the difference in means between **2** samples, populations, or treatments. T-tests are performed using `t.test(variable, factor)`. Lets see if there is a difference in whole weight of abalones between males and females.Run a t-test on your data. What is the error message?
+
+```{r t.test, message=TRUE, error=TRUE}
+t.test(abalone$WholeWeight~abalone$Sex)
+```
+
+The error message is telling you that you have more than 2 levels, ie more than two sexes in your database. Therefore subset the database to include only males and females.
+
+```{r subsetting, echo=FALSE}
+#excercise
+```
+
+Now run the t.test on the reduced dataset.
+
+```{r t.test adults, echo=FALSE}
+t.test(adult.abs$WholeWeight~adult.abs$Sex)
+```
+
+
+## ANalysis Of VAriance
+ANOVA is similar to a t-test, but for testing for differences between more than 2 groups. This test works by comparing the common variance within groups with the between group variance. The F-statistic is calculated by the ratio: SS-between/SS-within. Try an anova to test for difference in whole mass between all sexes. NOTE: Make sure subject column is a factor, so that it's not treated as a continuous variable.
+
+```{r}
+str(abalone)
+```
+
+Ours is a factor but if it wasn't you would run:
+
+```{r}
+abalone$Sex <- as.factor(abalone$Sex)
+```
+
+Run the anova
+
+```{r}
+aov1 <- aov(WholeWeight ~ Sex, data = abalone)
+aov1
+class(aov1)
+summary(aov1)
+anova(aov1)
+model.tables(aov1, "means")
+
+``` 
+
+So we can see that there is a difference between our groups, but we do not know how groups might differ. To examine this we can run a post hoc analysis, in this case Tukey's HSD (Honest Significant Difference). To perform this we use `TukeyHSD()` on our aov object. 
+
+```{r}
+boxplot(WholeWeight ~ Sex, data=abalone)
+
+TukeyHSD(aov1)
+```
+
+Which groups are different?
+
+One very important thing to remember is that ANOVAs were originally designed for balanced samples (ie. the same number of samples per group or treatment). So this an important thing to keep in mind when interpretting your results.
