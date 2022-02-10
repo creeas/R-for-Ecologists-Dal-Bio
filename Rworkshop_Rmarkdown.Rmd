@@ -1,7 +1,7 @@
 ---
 title: "Rworkshop Introduction to Rmarkdown"
-author: "davidson"
-date: "April 29, 2019"
+author: "C mull"
+date: "Feb 2022"
 output:
   html_document:
     depth: 5
@@ -14,7 +14,7 @@ output:
     toc: yes
   word_document:
     toc: yes
-subtitle: Vancouver Aquarium - Oceanwise
+subtitle: Dalhousie Biology Graduate Module
 
 ---
 
@@ -59,7 +59,7 @@ To inset a chunk click the `Insert` button above or use the keyboard shortcut Ct
 Insert a chunk and inside the chunk write code to load up the `Cetacean.csv` data that we used previously. Then write out code that creates and object that is the number of species in our cetacean database.  
 **ANSWER:**
 ```{r setup}
-knitr::opts_knit$set(root.dir="/Users/cmull/Desktop/R courses/cRash-course/")
+knitr::opts_knit$set(root.dir="/Users/cmull/Desktop/R courses/R Module/R-for-Ecologists-Dal-Bio/")
 #can also use the "../" which works because our RMarkdown file is in the code folder, but we want to set the folder above "cRash-course" as our working directory when we knit the report.
 #knitr::opts_knit$set(root.dir="../")
 ```
