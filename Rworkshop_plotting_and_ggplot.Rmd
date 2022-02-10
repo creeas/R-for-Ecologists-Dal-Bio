@@ -217,32 +217,28 @@ Try the same scatterplot but show upper beak length (`ubeakl`) with size. Write 
 
 ```{r aes1-ex}
  # exercise
-ggplot(morph, aes(wingl, beakh)) +
-  geom_point(aes(size=ubeakl, color=sex))
+
 ```
 
 Try the same scatterplot but show the taxon with colour:
 
 ```{r aes2-ex}
  # exercise
-ggplot(morph, aes(wingl, beakh)) +
-  geom_point(aes(color=taxon, size=ubeakl))
+
 ```
 
 Try the same scatterplot but show the upper beak length with colour (note how ggplot treats `ubeakl` differently than `taxon` when it picks a colour scale -- why is that?):
 
 ```{r aes3-ex}
  # exercise
-ggplot(morph, aes(wingl, beakh)) +
-  geom_point(aes(color=ubeakl))
+
 ```
 
 Bonus: If you've gotten this far, try combining colour for taxon, shape for sex, and size for upper beak length. This last version is a bit silly, but it illustrates how quickly you can explore multiple dimensions with ggplot2.
 
 ```{r aes4-ex}
  # exercise
-ggplot(morph, aes(wingl, beakh)) +
-  geom_point(aes(color=taxon, shape=sex, size = ubeakl))
+
 ```
 
 
@@ -278,35 +274,28 @@ Try showing the distribution of wing length for male and female birds by using `
 
 ```{r geom1}
  # exercise
-ggplot(morph, aes(sex,wingl, color=sex)) +
-  geom_violin() +
-  geom_point()
+
 ```
 
 Try showing the distribution of wing length with `geom_histogram()` (note that histograms only require an `x` aesthetic):
 
 ```{r geom2}
  # exercise
-ggplot(morph, aes(wingl)) +
-  geom_histogram(binwidth = 2)
+
 ```
 
 Try making a boxplot with `taxon` on the x axis and `wingl` on the y axis.
 
 ```{r geom3}
  # exercise
-ggplot(morph, aes(taxon,wingl)) +
-  geom_boxplot()
+
 ```
 
 Bonus: If you've made it this far, try flipping the axes on your previous plot so the labels are readable. (Hint: see `?coord_flip`)
 
 ```{r geom4}
  # exercise
-ggplot(morph, aes(wingl,taxon)) +
-  geom_boxplot() +
-  xlab("Wing Length") +
-  ylab("Species Name")
+
   
 ```
 
@@ -354,10 +343,7 @@ ggplot(morph, aes(wingl, beakh))+
 Can you create a plot of beak height over beak length, with different symbols for each taxon, and a color ramp for wing length? Can you create clean labels for the axes and title?
 
 ```{r}
-ggplot(morph, aes(ubeakl, beakh)) +
-  geom_point(aes(shape=taxon, color=wingl)) +
-  scale_shape_manual(values = c(0:11)) +
-  scale_color_gradient(low="blue", high="red") +
-  labs(title = "My stupid graph", y="Beak Height", x="Upper Beak Length")
+#challenge
+
 ```
 
