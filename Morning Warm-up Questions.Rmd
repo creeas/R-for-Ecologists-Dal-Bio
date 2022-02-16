@@ -14,137 +14,60 @@ The following sections are just some warm-up questions for us to do together eac
 
 
 #Subset data to only include those entries from Scotland
-head(data)
-names(data)
-Scot <- subset(data, Location == "Scotland")
+
 
 #How many entries are in the database?
-str(Scot) 
-dim(Scot)
+
 
 #How many unique species are in the Scotland database?
-length(unique(Scot$X.Species.))
+
 
 
 #What is the range of the ages in the Scotland database?
-range(Scot$Age)
-min(Scot$Age)
-max(Scot$Age)
-summary(Scot$Age)
+
 
 
 #Subset the original data to only include those entries from Scotland that are also from the Phocoenaphocoena and greater than 8 years of age. 
-Scot_pho <- subset(Scot, X.Species. == "Phocoenaphocoena" & Age >8)
 
-Scot_pho <- subset(data, data$Location == "Scotland" & data$X.Species. == "Phocoenaphocoena" & data$Age >8)
 
 
 #Subset the database to only include those entries that are not from Scotland
-Notscot <- subset(data, data$Location != "Scotland")
+
 
 
 #Plot the age distribution of cetacean from Scotland and Spain in boxplots by species and location. 
-boxplot(data$Age ~ data$X.Species. * data$Location)
 
-boxplot(Age ~ X.Species.*Location, data = data)
-
-#compare the locations of the boxplots to this code
-
-boxplot(Age ~ Location* X.Species., data = data, 
-        col=ifelse(levels(data$Location)=="Spain" , "red" , 
-    "grey90" ) )
-
-boxplot(Age ~ Location* X.Species., data = data, 
-    col=ifelse(levels(data$X.Species.)=="Delphinusdelphis" , "red" , 
-    ifelse(levels(data$X.Species.)=="Lagenorhynchusacutus","orange", 
-           ifelse(levels(data$X.Species.) == "Stenellacoeruleoalba", "yellow",
-            ifelse(levels(data$X.Species.) == "Stenellafrontalis", "purple", "grey")))) )
 
 
 #Plot the age distribution of cetaceans by Dolphin.ID from Scotland and from Spain. Use a dot plot, make the Spain points orange and the Scotland points blue. 
-Scot <- subset(data, data$Location == "Scotland")
-Spain <- subset(data, data$Location == "Spain")
 
-plot(Scot$Age ~ Scot$Dolphin.ID  , data= Scot, xlim = range(data$Dolphin.ID), ylim = range(data$Dolphin.ID), col = "blue") 
-
-points(Spain$Age ~ Spain$Dolphin.ID, data = Spain, xlim = range(data$Dolphin.ID), ylim = range(data$Dolphin.ID), col = "green")
 
 ```
 
 
 
-##Day 3
+## libraries
 ```{r libraries, include=FALSE}
 #how do I load the `tidyverse` package
-library(tidyverse)
+
 ```
 
 ## Data loading
 
 ```{r brain size data}
-#how do I load my `brain.size.csv` file and create a new dataframe?
-bs <- read.csv("Data/brain.size.csv")
-summary(bs)
-str(bs)
+#how do I load my `abalone.csv` file and create a new dataframe?
+
 ```
 
 ## Including Plots
 
 ```{r plotting}
 #how do I plot the entire dataset for an exploratory check?
-plot(bs)
-#how do I plot brain mass over body mass?
-plot(bs$brain.mass ~ bs$body.mass)
-#how do I log transform these variables?
-plot(log10(bs$brain.mass) ~ log10(bs$body.mass))
 
-log.brain.mass <- log10(bs$brain.mass)
-head(bs)
-```
+#how do I plot Whole Weight over age?
 
-## Simple model
+#how do I change this plot to distinguish between males and females?
 
-```{r linear model}
-#How do I run a simple linear regression of brain mass over body mass?
-model <- lm(brain.mass ~ body.mass, data=bs)
-summary(model)
-
-#What is the intercept and slope of this regression?
-```
-
-
-##Day 4
-
-If I write the following linear regression function what am I telling R to do:
-
-```{r linear model}
-m <- lm(log.brain.mass ~ log.body.mass_1kg*bearing.mode, data = bs)
-#How is R treating the data? How can I be sure when I am writing this model?
-str(bs)
-#How can I check the output?
-summary(m)
-#What is this output telling me?
-```
-
-
-```{r data wrangling}
-#I have loaded a data frame called bt. How can I see inspect the dataframe?
-glimpse(bt)
-#What is the following command doing?
-small.brain <- filter(bt, adult.brain.mass < mean(adult.brain.mass))
-glimpse(small.brain)
-#What about the following line of code?
-hammerheads <- filter(bt, family == "Sphyrnidae")
-stop.hammer.time <- filter(bt, family != "Sphyrnidae")
-
-#What does this symbol mean %>%?
-pipe!
-#What would the dataframe returned by the following line of code contain?
-new.bt <- bt %>% 
-  filter(order != "Carcharhiniformes") %>% 
-  group_by(family) %>% 
-  summarise(brain = mean(adult.brain.mass),
-            number = length(species))
-glimpse(new.bt)
+#how can I create separate plots for males and females using facets in ggplot?
 ```
 
