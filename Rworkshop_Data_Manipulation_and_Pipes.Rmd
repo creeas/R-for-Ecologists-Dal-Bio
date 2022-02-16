@@ -1,6 +1,6 @@
 ---
 title: "Data Manipulation and Pipes"
-author: 'Mull'
+author: 'C Mull'
 date: 'June 2021'
 output:
   html_document:
@@ -14,14 +14,14 @@ output:
     toc: yes
   word_document:
     toc: yes
-subtitle: cRash course iFisheries lab
+subtitle: Dal Biology Grad Module
 editor_options: 
   chunk_output_type: console
 ---
 
-#Introduction to Data Manipulation and Pipes
+# Introduction to Data Manipulation and Pipes
 
-##Libraries
+## Libraries
 In R you can load packages where scripts and functions have already been written. To use a library, you first need to install the package. You use the `install.packages` function and specify the package inside the " ". Here we are loading in the `tidyverse` package. Note, you will have to load the library each time you open R but only install the package once.
 
 ```{r, eval=FALSE}
@@ -47,11 +47,11 @@ citation("tidyverse")
 ```
 
 
-##Summarizing and Data Wrangling with Dplyr
+## Summarizing and Data Wrangling with Dplyr
 
 dplyr is a package that will make filtering, subsetting, summarizing, and transforming your data much, much easier. It is less verbose that other packages and is simple too implement. There are a number of functions within the `dplyr` package such as:  `select`,  `filter`,  `summarise`,  `mutate`,  `group_by`. dplyr can also be used to combine separate dataframes based on exisitng columns. A great resource for data wrangling in dplyr can be found in this [cheat sheet](https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf).
 
-###dplyr::select()
+### dplyr::select()
 
 Let's first use the select function.  `select` is a way to choose columns of a database. Here, you can select just one column called `species`, two columns (`species` and `family`) or all columns from `species` to `family`. Use `?select` to get more information.
 
@@ -74,7 +74,7 @@ data_sel <- select(data, order:reproductive.mode) #can select a range columns
 #NOTE: columns can also be selected by column number as in subset, but again it is best for reproducability to use explicit names in case your datframe changes.
 ```
 
-###dplyr::filter()
+### dplyr::filter()
 
 Instead of using the `subset` function that we used above. `dplyr` has a similar function called `filter`. The advantage with the `filter` function is that it is less verbose and more powerful. As with `subset` you can use the operators:  `==`  `>`  `<`  `<=`  `!=` and others. You can also use `&` for multiple criteria, `|` for meeting optional criteria (this or this).
 
@@ -87,7 +87,7 @@ data_bigbrain <- filter(data, brain.mass > mean(brain.mass)) #extract rows based
 
 data_reefshelfbigbrain <- filter(data, habitat == "Reef" & brain.mass>= mean(brain.mass) | habitat == "Shelf" & brain.mass>= mean(brain.mass)) #can combine criteria using boolean operators
 
-glimpse(data_reefbigbrain)
+glimpse(data_reefshelfbigbrain)
 ```
 
 You can use the %in% to filter based on finding values in a string or another database. Here I create a string of 5 randomly selected species and filter the database based on those 5 species. 
@@ -95,7 +95,9 @@ You can use the %in% to filter based on finding values in a string or another da
 ```{r}
 
 data[rows,columns]
-fivespp <- data[10, "species"]
+sample <- sample(c(1:35), size=5)
+
+fivespp <- data[sample, "species"]
 
 fivespp
 
@@ -109,7 +111,8 @@ data_5families <-  filter(data, family %in% fivefamilies)
 ```
 
 
-###dplyr::mutate()
+### dplyr::mutate()
+
 `Mutate` can be used to add a new column to the dataframe using the values of an existing one. This a good way to combine or transform variables while retaining the original values. `transmute` can also create one or more new columns, but only returns the new column(s).
 
 ```{r dplyr::mutate, echo=FALSE}
@@ -121,7 +124,21 @@ log.data <- mutate(data, log.brain.mass = log10(brain.mass),
 glimpse(mutate(data, fore.hind.brain = telencephalon + medulla))
 ```
 
-###dplyr::summarise()
+Mutate is a very useful function in which to combine lots of clean-up steps into a single line of code. You can use mutate to alter the class of variables, or to recode() variables.
+
+```{r dplyr::mutate 2, echo=FALSE}
+
+glimpse(mutate(data, fore.hind.brain = telencephalon + medulla,
+       superorder = as.factor(superorder),
+       fancy_class = recode(class, "Batoids" = "Flat Sharks", #recode takes on the format "old" = "new"
+                            "Chimaeras" = "Ghost Sharks",
+                            "Sharks" = "Sharky Sharks")))
+
+```
+
+
+
+### dplyr::summarise()
 
 `Summarise` is a function that will create a new database summarizing your data. This is useful for generating summary startistics based on an exisitng column. 
 
@@ -132,7 +149,7 @@ summarise(data, max(depth))
 ```
 
 
-###Joining datasets
+### Joining datasets
 It is straightforward to combine two dataframes in dplyr based on a matching column in each using `_join()`. 
 
 ```{r dplyr::join}
@@ -147,17 +164,31 @@ glimpse(brain.body)
 ```
 
 
-##Pipes!
+## Pipes!
 
-*Pipes `%>%`. You can perform calculations (summarize, mutate, etc.) on subsets of the data (using `group_by`) and then put that database back together. The `%>%` syntax lets you perform multiple functions. The `group-by` syntax specifies how you want the database split. Above, we counted the number of unique species in the database. Here, we are going to count the number of unique species in each of the superorders and put the results in a new database. 
+Putting it all together! *Pipes `%>%`. You can perform calculations (summarize, mutate, etc.) on subsets of the data (using `group_by`) and then put that database back together. The `%>%` syntax lets you perform multiple functions. Pipes take the output of one line and pipe it directly to the next function, so we don't need to specify the input object as it takes the output of the previous line directly.
 
-```{r}
+```{r magrittr::pipes, echo=FALSE}
+
+filter(data, species %in% fivespp) %>%
+  summarise(max(depth))
+
+filter(data, species %in% fivespp) %>%
+  summarise(n_distinct(species))
+```
+
+
+### group_by()
+
+The `group-by` syntax specifies how you want the database grouped, and is particulary useful when summarizing across factors, levels, or hierarchies. Above, we counted the number of unique species in the database. Here, we are going to count the number of unique species in each of the superorders and put the results in a new database. 
+
+```{r group_by, echo=FALSE}
 
 numspp<-data %>%  
   group_by(superorder) %>% 
   summarise(NumSpecies = length(species),
-                                                    max.brain = max(brain.mass),
-                                                    log.brain = log10(max.brain))
+            max.brain = max(brain.mass),
+            log.brain = log10(max.brain))
 
 ```
 
@@ -166,19 +197,30 @@ Instead of creating a new data.frame with `summarise`, you can add a column usin
 ```{r}
 new.data <- data %>% group_by(superorder) %>% mutate(mean.brain = mean(brain.mass)) %>%
   mutate(brain.diff = brain.mass-mean.brain) %>%
-  group_by(.) %>%
+  group_by(.) %>% #This step removes the previous group_by statement to return values for each row
   select(species, brain.diff)
-glimpse(data)
+glimpse(new.data)
 ```
 
-###dplyr challenges
-Create a new database that summarizes `data` and has a new column that counts the number of species that are lecithotrophic or matrotrophic. Use the `names(data)` to see the column names and use the `length` fucntion to count the number of species. 
+### dplyr challenges
+
+Create a new database that summarizes `data` and has a new column that counts the number of species that are lecithotrophic or matrotrophic. Use the `names(data)` to see the column names and use the `length` function to count the number of species. 
 
 ```{r}
 
 ```
 
-Create a new database that calculates the mean `brain.mass` of the four superorders but exlude the Carcharhiniformes. 
+Create a new database that calculates the mean `brain.mass` of the four superorders BUT EXCLUDE the Carcharhiniformes. 
+
+```{r}
+
+
+```
+
+
+### Pipe challenge!
+
+When working within the tidyverse you can combine packages (dplyr and ggplot). Using this idea can you create a plot of the realtive difference in body mass over depth, with a different color for each superorder.
 
 ```{r}
 
