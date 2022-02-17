@@ -18,7 +18,7 @@ subtitle: Dalhousie Biology Graduate Module
 
 ---
 
-#Rmarkdown introduction
+# Rmarkdown introduction
 
 ## R Markdown
 The rest of the course will be taught in R Markdown. We are doing this because your notes for future reference will be a lot more organized and easier to follow. 
@@ -58,12 +58,19 @@ To inset a chunk click the `Insert` button above or use the keyboard shortcut Ct
 
 Insert a chunk and inside the chunk write code to load up the `Cetacean.csv` data that we used previously. Then write out code that creates and object that is the number of species in our cetacean database.  
 **ANSWER:**
+
 ```{r setup}
 knitr::opts_knit$set(root.dir="/Users/cmull/Desktop/R courses/R Module/R-for-Ecologists-Dal-Bio/")
 #can also use the "../" which works because our RMarkdown file is in the code folder, but we want to set the folder above "cRash-course" as our working directory when we knit the report.
 #knitr::opts_knit$set(root.dir="../")
 ```
 
+
+```{r libraries, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(knitr)
+```
 
 
 Insert a chunk and inside the chunk write code to print the first 6 entries in the database. 
@@ -99,6 +106,14 @@ Most common (can use more than one):
 Insert a chunk and write code in the chunk that subsets the `data` database to include only `Delphinusdelphis` species that are > than 10 years old. Also, include code in the chunk so that we don't see the R code on the output.  
 **ANSWER:**
 
+```{r echo=FALSE}
+
+new.data <- subset(data, X.Species. == "Delphinusdelphis" & Age > 10)
+#head(new.data)
+kable(new.data)
+```
+
+
 `{r include = FALSE}` output:
 
 What is the difference with `{r echo = FALSE}`?
@@ -110,18 +125,13 @@ What is the difference with `{r echo = FALSE}`?
 
 Use the knitr package to have a nicer looking dataframe, suppress the warning message you get when you load the package with `warning = FALSE`, and suppressing the R code with `echo = FALSE`.
 ```{r echo = FALSE, warning=FALSE}
-library(knitr)
+
 data_head <- head(data)
 kable(data_head, digits = 2)
 ```
 
 You can name your chunks for easier reference (see below).
-```{r load_library, include=FALSE}
-library(dplyr)
-library(ggplot2)
-library(knitr)
 
-```
 
 You can set global options (that apply to all chunks). This does not override each chunk setting.
 ```{r setup2, include=FALSE}
