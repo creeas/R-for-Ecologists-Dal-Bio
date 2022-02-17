@@ -34,7 +34,7 @@ Today we will cover:
 
 ### Strings
 
- Strings are vectors of characters. You can create strings with either single quotes or double quotes. When uploading data, columns that contain alpha numeric characters (EVEN IN A SINGLE CELL) will be traeted as a character, so always goodot check the class using `str()` or `dplyr::glimpse()`.
+Strings are vectors of characters. You can create strings with either single quotes or double quotes. When uploading data, columns that contain alpha numeric characters (EVEN IN A SINGLE CELL) will be treated as a character, so always good to check the class using `str()` or `dplyr::glimpse()`.
  
 ```{r}
 string1 <- "This is a string"
@@ -42,7 +42,7 @@ string1 <- "This is a string"
 string2 <- 'If I want to include a "quote" inside a string, I use single quotes'
 ```
  
- Multiple strings are often stored in a character vector, which you can create with `c()`. This can be used to create lists that are then acted on using the `%in%` operator.
+Multiple strings are often stored in a character vector, which you can create with `c()`. This can be used to create lists that are then acted on using the `%in%` operator.
  
  
 ```{r}
@@ -54,7 +54,7 @@ c("one", "two", "three")
 
 fivefamilies <- c("Carcharhinidae", "Lamnidae", "Dasyatidae", "Chimaeridae", "Urotrygonidae")
 
-data_5families <-  filter(data, family %in% fivefamilies)
+data_5families <-  filter(bs, family %in% fivefamilies)
 
 ```
  
@@ -151,11 +151,18 @@ x <- c("1 house", "2 cars", "3 people")
 str_replace_all(x, c("1" = "one", "2" = "two", "3" = "three"))
 ```
 
+
+Trim whitespace
+
+```{r}
+str_trim()
+```
+
 There are tons of this you can do with the `stringr` package to work with and manipulate strings. 
 
 
 ### Factors
- The `forcats` package has lots of tools for working with factors. And while I won't go into them here one of the most useful functions for controling factors is being able to control the order of them. This is really useful for models when you want to set one factor level as the baseline (ex. treatment) of if you want to plot factors in a certain order.
+ The `forcats` package has lots of tools for working with factors. And while I won't go into them here one of the most useful functions for controlling factors is being able to control the order of them. This is really useful for models when you want to set one factor level as the baseline (ex. treatment) of if you want to plot factors in a certain order.
  
 ```{r}
 
@@ -208,6 +215,7 @@ Time data can also be compiled from individual components.
 
 ```{r}
 
+library(nycflights13)
 
 flights %>% 
   select(year, month, day, hour, minute)
@@ -268,22 +276,22 @@ table4b
 ```
 
 
-
 ### Pivoting
 
 Pivot provides a nice way to reshape our data into the format we would like. Typically when pivoting a dataset we will be pivoting from a wide format to a long format for easier use and manipulation in R.
 
-Data is often organized to make data entry easier, but this is not always ideal for analysis. This often results in two comon problems where one variable might be spread across multiple columns, spread across multiple rows, or column names may contain values. We can fix these common issues by pivoting using `pivot_longer` and `pivot_wider`.
+Data is often organized to make data entry easier, but this is not always ideal for analysis. This often results in two common problems where one variable might be spread across multiple columns, spread across multiple rows, or column names may contain values. We can fix these common issues by pivoting using `pivot_longer` and `pivot_wider`.
 
 ## Pivot_longer
 
-Common when dowloading large daasets including time-series are when columns names contain *values* of a variable. Take table4a: the column names 1999 and 2000 represent values of the year variable, the values in the 1999 and 2000 columns represent values of the cases variable, and each row represents two observations, not one. Here we need to move the column names to a column called `year` and the column values to a column called `cases`.
+Common when downloading large datasets including time-series are when columns names contain *values* of a variable. Take table4a: the column names 1999 and 2000 represent values of the year variable, the values in the 1999 and 2000 columns represent values of the cases variable, and each row represents two observations, not one. Here we need to move the column names to a column called `year` and the column values to a column called `cases`.
 
 The columns to pivot are specified with `dplyr::select()` notation so refer to Data Wrangling and Pipes from yesterday's code for examples on syntax.
 
 ```{r pivot_longer, echo=FALSE}
 table4a %>% 
-  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases") %>%
+  mutate(year = as.integer(year))
 ```
 
 
@@ -364,7 +372,8 @@ table5 %>%
 
  #default places an underscore, can control with the sep option.
 table5 %>% 
-  unite(new, century, year, sep = "")
+  unite(new, century, year, sep = "") %>%
+  separate(rate, into = c("cases", "population"))
 
 ```
 
@@ -373,7 +382,26 @@ table5 %>%
 
 Load in the dataset `FAO.csv` a snapshot of global landings of sharks and rays. Create a tidy dataset of total catches per year for each country, but only for countries in Europe. 
 
+pivot
+
+filter
+
+group_by
+
+summarize
+
 ```{r}
+fao <- read.csv("Data/FAO.csv")
+glimpse(fao)
+
+non.eu <- c("Chile", "Ghana")
+
+fao2 <- fao %>%
+  pivot_longer(c("X1980":"X2000"), names_to = "year", values_to = "total catch") %>%
+  filter(!Country %in% non.eu) %>%
+  group_by(Country, year) %>%
+  summarise(`total catch` = sum(`total catch`)) %>%
+  mutate(across("year",str_replace,"X",""))
 
 ```
 

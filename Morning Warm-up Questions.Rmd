@@ -99,18 +99,30 @@ ggplot(data, aes(Rings, WholeWeight)) +
 ## Data Wrangling
 
 ```{r}
-#load the shark and ray brain size data file as an object call bs
+#load the shark and ray brain size file as an object call bs
+
+bs <- read.csv("Data/brain.data.csv")
 
 
 #Plot the entire data set for exploration and hypothesis generation
 
+plot(bs)
+
+plot(bs)[,c("telencephalon":"body.mass")]
+
+summary(bs)
 
 #Create a new column that is a combination of telencephalon size and medulla size
+
+transmute(bs, tel.med = telencephalon + medulla) 
 
 
 #Create a new database that summarizes `bs` and has columns that count the number of species and mean body mass per habitat type. Hint: use `group_by` `summarize`.
 
-
+new.dat <- bs %>%
+  group_by(habitat) %>%
+  summarise(numspec = length(species),
+            mean.body = mean(body.mass))
 
 
 ```
@@ -120,8 +132,28 @@ ggplot(data, aes(Rings, WholeWeight)) +
 
 When working within the tidyverse you can combine packages (dplyr and ggplot). Using this idea can you create a plot of the relative difference in body mass over depth, with a different color for each superorder.
 
-```{r}
+group_by
 
+summarise mean body
+
+ungroup
+
+mutate relative body
+
+plot rel body/depth
+
+across the various superorder
+
+```{r}
+bs %>%
+  group_by(superorder) %>%
+  mutate(body.mass = log10(body.mass)) %>%
+  mutate(mean.body = mean(body.mass)) %>%
+  mutate(rel.body = body.mass - mean.body) %>%
+  group_by(.) %>%
+  ggplot(aes(x = depth, y = rel.body)) +
+  geom_point(aes(color=superorder)) +
+  facet_wrap(~class)
 
 ```
 
