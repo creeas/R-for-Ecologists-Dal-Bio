@@ -137,7 +137,8 @@ d <- data.frame(x = c(1:8, 1:8), y = runif(16),
   group1 = rep(gl(2, 4, labels = c("a", "b")), 2),
   group2 = gl(2, 8))
 head(d)
-ggplot(data = d, aes(x = x, y = y, colour = group1)) + geom_point() +
+ggplot(data = d, aes(x = x, y = y, color = group1)) +
+  geom_point() +
   facet_grid(~group2)
 ```
 
@@ -170,7 +171,8 @@ ggplot(mpg, aes(cty, hwy)) +
 If characteristics like color or shape are defined outside the `aes()` function, then the characteristic is not mapped to data:
 
 ```{r aes2}
-ggplot(mpg, aes(cty, hwy)) + geom_point(aes(colour = cyl))
+ggplot(mpg) + 
+  geom_point(aes(cty, hwy,colour = cyl)) 
 
 ```
 
@@ -205,40 +207,43 @@ I'm going to map the male/female value to a colour in our scatterplot of wing le
 
 ```{r aes3}
 ggplot(morph, aes(wingl, beakh)) +
-  geom_point(aes(colour = sex)) +
-  geom_line()
+  geom_point(aes(colour = sex)) 
 ```
 
 ## Challenge 1
 
 Explore the `morph` dataset yourself by applying some aesthetics. You can see all the available aesthetics for a given geom by looking at the documentation, e.g. `?geom_point`, or at <http://docs.ggplot2.org/current/>.
 
-Try the same scatterplot but show upper beak length (`ubeakl`) with size. Write out your code in the chunks below:
+Try the same scatterplot but show symbol size as upper beak length (`ubeakl`). Write out your code in the chunks below:
 
 ```{r aes1-ex}
  # exercise
-
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(size=ubeakl))
 ```
 
-Try the same scatterplot but show the taxon with colour:
+Try the same scatterplot but show the taxon with symbol colour:
 
 ```{r aes2-ex}
  # exercise
-
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(color=taxon))
 ```
 
 Try the same scatterplot but show the upper beak length with colour (note how ggplot treats `ubeakl` differently than `taxon` when it picks a colour scale -- why is that?):
 
 ```{r aes3-ex}
  # exercise
-
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(color=ubeakl))
 ```
 
 Bonus: If you've gotten this far, try combining colour for taxon, shape for sex, and size for upper beak length. This last version is a bit silly, but it illustrates how quickly you can explore multiple dimensions with ggplot2.
 
 ```{r aes4-ex}
  # exercise
-
+ggplot(morph, aes(wingl, beakh)) +
+  geom_point(aes(color=taxon, shape=sex, size=ubeakl))
 ```
 
 
@@ -265,7 +270,8 @@ Open the ggplot2 web documentation <http://docs.ggplot2.org/> and keep it open t
 First, let's experiment with some geoms using the `morph` dataset that you downloaded and cleaned up above. I'll start by setting up a basic scatterplot of beak height vs. wing length:
 
 ```{r geom0}
-ggplot(morph, aes(wingl, beakh)) + geom_point()
+ggplot(morph, aes(wingl, beakh)) + 
+  geom_point()
 ```
 
 ### Challenge 1
@@ -274,28 +280,34 @@ Try showing the distribution of wing length for male and female birds by using `
 
 ```{r geom1}
  # exercise
-
+ggplot(morph, aes(sex, wingl)) +
+  geom_violin() +
+  geom_dotplot(binaxis = "y")
 ```
 
 Try showing the distribution of wing length with `geom_histogram()` (note that histograms only require an `x` aesthetic):
 
 ```{r geom2}
  # exercise
-
+ggplot(morph, aes(wingl)) +
+  geom_histogram(bins = 5)
 ```
 
 Try making a boxplot with `taxon` on the x axis and `wingl` on the y axis.
 
 ```{r geom3}
  # exercise
-
+ggplot(morph, aes(taxon, wingl)) +
+  geom_boxplot()
 ```
 
 Bonus: If you've made it this far, try flipping the axes on your previous plot so the labels are readable. (Hint: see `?coord_flip`)
 
 ```{r geom4}
  # exercise
-
+ggplot(morph, aes(wingl, taxon)) +
+  geom_boxplot() +
+  coord_flip()
   
 ```
 
@@ -312,7 +324,7 @@ ggplot2 has a set of built in themes for user which control many aspects set in 
 ```{r themes}
 ggplot(morph, aes(wingl, beakh)) + 
   geom_point() +
-  theme_light()
+  theme_dark()
 ```
 
 ###Custom colors
@@ -321,9 +333,10 @@ ggplot has lots of ways to set your colors in your plots and can be used to crea
 ```{r}
 ggplot(morph, aes(wingl, beakh)) +
   geom_point(aes(colour= sex)) +
-  scale_color_manual(name = "sex",
-                     values = c("F" = "#bf0584",
-                                  "M" = "blue")) +
+  #scale_color_manual(name = "sex",
+  #                   values = c("F" = "#bf0584",
+  #                                "M" = "blue")) +
+  scale_color_viridis_d() +
   xlab("Wing Length") +
   ylab("Beak Height") +
   theme_dark() 
@@ -344,6 +357,7 @@ Can you create a plot of beak height over beak length, with different symbols fo
 
 ```{r}
 #challenge
+
 
 ```
 

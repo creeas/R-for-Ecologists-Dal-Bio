@@ -86,7 +86,7 @@ a <- c((1+2)*3/4,10*10,1-1)
 #how can you see what your object a is?
 #ANSWER:
 
-
+a
 
 
 #You can also use other operators such as mean, sum, min, and max.
@@ -103,7 +103,9 @@ y
 #Write out two ways to create an object `z` that is the sum of 1,2,3,4,5,6,7.
 #ANSWER:
 
-
+z <- 1+2+3+4+5+6+7
+z <- sum(1,2,3,4,5,6,7)
+z <- sum(1:7)
 
 
 #If you run the following line of code, what happens? Look at the error message - what does it mean?
@@ -238,7 +240,8 @@ str(stringofchar)
 ##Importing:
 #Load up a .csv file called `Cetaceans.csv`. R works with .csv files as opposed to excel files (.xls or .xlsx).  
 #In your File Explorer navigate to the folder where your save the `Cetaceans.csv` file.  
-#You can set the working directory `setwd` so that R will automatically check that folder when you load up files. If you file is not in the folder that you `setwd` to, you will get an error message. 
+#You can set the working directory `setwd` so that R will automatically check that folder when you load up files. 
+#If your file is not in the folder that you `setwd` to, you will get an error message. 
 
 #NOTE: THIS CETACEANS DATABASE IS FROM HIGHLAND STATISTIC'S WEBSITE FOUND HERE: 
 #https://www.highstat.com/index.php/mixed-effects-models-and-extensions-in-ecology-with-r
@@ -276,7 +279,7 @@ class(data)
 #What is the structure of the 'data'?
 #ANSWER
 
-
+str(data)
 
 
 
@@ -287,6 +290,7 @@ class(data)
 
 #look at the full database
 data
+
 #what is the output telling us?
 #ANSWER:
 
@@ -324,10 +328,14 @@ summary(data)
 #The $ allows us to explore each of the columns a little better to get familiar with our data
 #Use the `$` to query a column in your object `data`. 
 
+data$Species
+
 #First - what are two ways we can see the column names of our database called 'data'?
 #ANSWER:
 
-
+names(data)
+summary(data)
+str(data)
 
 #Look at the values in the second column
 data$Species
@@ -340,11 +348,11 @@ str(data$Species)
 
 #data$Species - 
 #class(data$Species) - 
-#levels(data$Species) - 
+#unique(data$Species) - 
 
 #Let's look at the Age variable
 
-data$age
+data$Age
 
 #why is this NULL?
 #ANSWER:
@@ -360,6 +368,7 @@ data$Dolphin.ID
 class(data$Dolphin.ID)
 range(data$Dolphin.ID)
 levels(data$Dolphin.ID) #why is this NULL? 
+data$Dolphin.ID <- as.factor(data$Dolphin.ID)
 
 #you can switch between structure types, for example here the 'Dolphin.ID' column is an integer but really we want the values to be a factor  
 #covert the column from a integer to a factor using the following code:
@@ -369,13 +378,14 @@ data$Dolphin.ID <- as.factor(data$Dolphin.ID)
 #How can you check to see if it worked?
 #ANSWER:
 
+class(data$Dolphin.ID)
 
 
+#Find the maximum value of age in the dataset from the column "Age" 
 
-#Find the maximum value of maximum age in the dataset from the column "Age" 
+max(data$Age)
 
-mean(data$Age)
-
+range(data$Age)
 
 summary(data)
 
@@ -393,10 +403,12 @@ a
 #Write out the code for finding the smallest and mean age in the database.
 #ANSWER:
 
-
+range(data$Age)
+a <- min(data$Age)
 
 #Find the number of unique dolphin species that were sampled 
 
+unique(data$Species)
 
 #Use the `length` function to tell us how many entries are in the database.
 #Does this tell us the number of unique species names?
@@ -407,10 +419,10 @@ length(data$Species)
 
 dim(data)
 
-#Use the `length` and 'unique' function to tell us how many groups 
+#Use the `length` and 'unique' function to tell us how many species 
 #contributed to this database. 
 length(unique(data$Species))
-levels(data$Species) #only works on factors not characters
+length(levels(data$Dolphin.ID)) #only works on factors not characters
 
 #6 species are in this database
 
@@ -443,6 +455,8 @@ Stenaco_data
 Not_Stenaco_data <- subset(data, data$Species !="Stenellacoeruleoalba")
 Not_Stenaco_data
 
+unique(Not_Stenaco_data$Species)
+
 #subset the database to include only individuals with ages greater than 25 years of age
 names(data)
 
@@ -466,12 +480,17 @@ unique(threegroups$Species)
 
 
 #can also use this notation that is less verbose
-threegroups <- subset(data, data$Species == c("Delphinusdelphis",  "Lagenorhynchusacutus",  "Phocoenaphocoena"))
+threegroups <- subset(data, data$Species %in% c("Delphinusdelphis",  "Lagenorhynchusacutus",  "Phocoenaphocoena"))
+unique(threegroups$Species)
+
+three.sp.list <- c("Delphinusdelphis",  "Lagenorhynchusacutus",  "Phocoenaphocoena")
+
+threegroups <- subset(data, data$Species %in% three.sp.list)
 unique(threegroups$Species)
 
 threegroups$Species
 length(unique(threegroups$Species))
-levels(threegroups$Species)
+unique(threegroups$Species)
 
 
 #subset the database to include only "Delphinusdelphis" species that are greater than 10 years old
@@ -491,10 +510,10 @@ unique(notthreegroups$Species)
 length(unique(notthreegroups$Species))
 
 
-#subset the databse to include anything BUT Delphinusdelphis and those individuals less than 10 years of age
+#subset the database to include anything BUT Delphinusdelphis and those individuals less than 10 years of age
 data_spp_age <- subset(data, Age >10  & Species != "Delphinusdelphis")
 View(data_spp_age)
-
+unique(data_spp_age$Species)
 
 #subset the database to include species that match a string a values
 #use the %in% operator
@@ -521,7 +540,9 @@ data[1,1] #first row and first column
 
 data[1:10, 1:3] #first ten rows and three columns
 
-data[25:50,1:6] #why didn't this work
+data[25:50,1:6] 
+
+b[3]
 
 
 a <- c(25,2,13,17, 22)
@@ -582,12 +603,11 @@ head(data)
 ##Libraries
 #In R you can load packages where scripts and functions have already been written. To use a library, you first need to install the package. You use the `install.packages` function and specify the package inside the " ". Here we are loading in the `dplyr` package. Note, you will have to load the library each time you open R but only install the package once. 
 
-install.packages("dplyr")
+install.packages("tidyverse")
 
 #You will be asked to select a mirror for your download, select your location. Now load the library.
 
 library(dplyr) 
-
 
 #If you want to get some more information about the package use the `help` function. 
 
@@ -608,6 +628,7 @@ citation("dplyr")
 #Where is your abalone.csv file? what working directory are you in?
 #ANSWER:
 
+abalone <- read.csv("Data/abalone.csv")
 
 #read in the abalone,csv file and call the new object 'abalone'
 #ANSWER:
@@ -617,8 +638,10 @@ citation("dplyr")
 #BASIC PLOTTING
 names(abalone)
 
-#plot(x, y, data)
+#plot(x, y, data) plot(y~x)
+
 plot(abalone$Rings, abalone$Length)
+plot(abalone$Length ~ abalone$Rings)
 
 #change the points to be filled in, pch = point character
 plot(abalone$Rings, abalone$Length, pch = 19)
@@ -629,14 +652,27 @@ color.adjust=adjustcolor("grey50", alpha=0.2)
 plot(abalone$Rings, abalone$Length, pch = 17, col= color.adjust)
 
 #change the x and y axis labels and customize the y axis 
-plot(abalone$Rings, abalone$Length, pch = 19, col= "blue", 
-     cex=1, xlab = "Rings", ylab = "Length")
+plot(abalone$Rings, abalone$Length, pch = 19, col= color.adjust, 
+     cex=2, xlab = "Rings", ylab = "Length", bty="l")
 
-#plot a line of best fit ontop
-abline(h=0.5, col= "black", lwd = 3)
+#plot a line of best fit on top
+abline(0,.05, col= "red", lwd = 1.5, lty=2)
+
+
+par(mfrow=c(2,1), mar=c(4,4,1,2))
+plot(abalone$Rings, abalone$Length, pch = 19, col= color.adjust, 
+     cex=2, xlab = "Rings", ylab = "Length", bty="l")
+abline(0,.05, col= "red", lwd = 1.5, lty=2)
+
+plot(abalone$Rings, abalone$Length, pch = 19, col= color.adjust, 
+     cex=2, xlab = "Rings", ylab = "Length", bty="l")
+abline(0.5, -0.5, col= "blue", lwd = 1.5, lty=2)
 
 #plot a regression line
 ?lm
+par(mfrow=c(1,1))
+plot(abalone$Rings, abalone$Length, pch = 19, col= color.adjust, 
+     cex=2, xlab = "Rings", ylab = "Length", bty="l")
 lm<-lm(abalone$Length~abalone$Rings)
 abline(lm, col="blue", lwd=5, lty=2)
 abline(v = 10, col= "black", lwd = 3)
@@ -645,16 +681,23 @@ abline(v = 10, col= "black", lwd = 3)
 scatter.smooth(abalone$Rings, abalone$Length, pch = 19, col= col, 
      cex=2, xlab = "Rings", ylab = "Length" , lpars =
                     list(col = "red", lwd = 3, lty = 1))
+points(abalone$Rings, abalone$Length, pch = 19, col= color.adjust, 
+     cex=2)
 
 
 plot(abalone)
 
+names(abalone)
+
+plot(abalone[,c("Sex", "Height", "Rings")])
+
 #export the image to your current working directory
 #what is your working directory?
 
+getwd()
 
 # 1. Open jpeg file
-jpeg("new.rplot.jpg", width = 1400, height = 1400)
+jpeg("Plots/new.rplot.jpg", width = 1400, height = 1400)
 # 2. Create the plot
 plot(abalone$Rings, abalone$Length, pch = 19, col= color.adjust, 
      cex=2, xlab = "Rings", ylab = "Length", cex.lab=2, cex.axis=2)
@@ -663,9 +706,9 @@ dev.off()
 
 #look at your file - the text is too small, make it bigger
 # 1. Open jpeg file
-jpeg("new.rplot.jpg", units = "in", res = 300, width = 7, height = 5)
+jpeg("Plots/new.rplot.jpg", units = "in", res = 300, width = 7, height = 5)
 # 2. Create the plot
-par(mar = c(1,1,1,1)+4)
+par(mar = c(1,1,1,1)+2)
 par(oma = c(1,1,1,1))
 plot(abalone$Rings, abalone$Length, pch = 19, col= color.adjust, 
      cex=2, xlab = "Rings", ylab = "Length", cex.lab = 2, cex.axis = 2)
@@ -673,28 +716,33 @@ plot(abalone$Rings, abalone$Length, pch = 19, col= color.adjust,
 dev.off()
 
 
-color.male=adjustcolor("green", alpha=0.2)
+color.male=adjustcolor("red", alpha=0.2)
 color.female=adjustcolor("blue", alpha=0.2)
 
 #PLOT A two scatterplots on top of each other, male and female
 males <- subset(abalone, Sex == "M")
 females <- subset(abalone, Sex == "F")
+par(mar=c(4,4,1,1))
+par(oma = c(0,0,0,0))
 plot(Rings~Length, data = males, col=color.male, 
    ylim=range(abalone$Rings), xlim = range(abalone$Length), xlab="Length",
-   ylab="Rings", cex.lab=0.8, pch = 19)
+   ylab="Rings", cex.lab=1, pch = 19)
 
 points(Rings~Length, data = females, type="p", col=color.female, 
    ylim=range(abalone$Rings), xlim = range(abalone$Length), xlab="Length",
    ylab="Rings", cex.lab=0.8, pch = 19)
 
 #BOXPLOTS
+str(abalone)
+par(mar=c(4,4,1,1))
+par(oma = c(0,0,0,0))
 boxplot(as.factor(abalone$Sex), abalone$Length, 
         xlab="Sex", ylab="Age") 
 
 #pretty basic, add some colour
 boxplot(as.factor(abalone$Sex), abalone$Length,  
-   xlab="Sex", ylab="Age", 
-   col=(c("gold","darkgreen")), 
+   xlab="Sex", ylab="Length", 
+   col=(c("darkred","darkgreen")), 
    axes=FALSE)
 # Make x axis using Male-Female labels
 axis(1, at=1:2, lab=c("Females", "Males"))
