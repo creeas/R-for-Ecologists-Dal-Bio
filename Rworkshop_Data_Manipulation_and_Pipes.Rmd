@@ -71,7 +71,7 @@ data_sppfam <- select(data, species, family) #can select specific columns
 
 data_sel <- select(data, order:reproductive.mode) #can select a range columns
 
-#NOTE: columns can also be selected by column number as in subset, but again it is best for reproducability to use explicit names in case your datframe changes.
+#NOTE: columns can also be selected by column number as in subset, but again it is best for reproducibility to use explicit names in case your dataframe changes.
 ```
 
 ### dplyr::filter()
@@ -81,7 +81,7 @@ Instead of using the `subset` function that we used above. `dplyr` has a similar
 ```{r dplyr::filter, echo=FALSE}
 glimpse(data)
 
-data_batoids <- filter(data, class == "Batoids") #extract rows that pertain to a particlar group or variable level
+data_batoids <- filter(data, class == "Batoids") #extract rows that pertain to a particular group or variable level
 
 data_bigbrain <- filter(data, brain.mass > mean(brain.mass)) #extract rows based on logical criteria
 
@@ -95,6 +95,7 @@ You can use the %in% to filter based on finding values in a string or another da
 ```{r}
 
 data[rows,columns]
+
 sample <- sample(c(1:35), size=5)
 
 fivespp <- data[sample, "species"]
@@ -102,6 +103,8 @@ fivespp <- data[sample, "species"]
 fivespp
 
 data_5spp <- filter(data, species %in% fivespp) 
+
+distinct(data_5spp)
 
 #can also create a custom list to extract
 
@@ -119,9 +122,19 @@ data_5families <-  filter(data, family %in% fivefamilies)
 glimpse(data)
 
 log.data <- mutate(data, log.brain.mass = log10(brain.mass),
-                   log.body.mass = log10(body.mass))
+                   log.body.mass = log10(body.mass),
+                   new.depth = depth + body.mass,
+                   size = ifelse(brain.mass > 10, "Big Brain", "Small Brain"))
+
+nonsense <- transmute(data, new.depth = depth + body.mass)
+
+glimpse(log.data)
 
 glimpse(mutate(data, fore.hind.brain = telencephalon + medulla))
+
+#can also create columns based on logical operators using ifelse(). 
+
+glimpse(mutate(data, size = ifelse(brain.mass > 10, "Big Brain", "Small Brain")))
 ```
 
 Mutate is a very useful function in which to combine lots of clean-up steps into a single line of code. You can use mutate to alter the class of variables, or to recode() variables.
@@ -140,10 +153,12 @@ glimpse(mutate(data, fore.hind.brain = telencephalon + medulla,
 
 ### dplyr::summarise()
 
-`Summarise` is a function that will create a new database summarizing your data. This is useful for generating summary startistics based on an exisitng column. 
+`Summarise` is a function that will create a new database summarizing your data. This is useful for generating summary statistics based on an exsisitng column. 
 
 ```{r dply::summarise, echo=FALSE}
 summarise(data, n_distinct(species))
+
+summarize(data, unique(species))
 
 summarise(data, max(depth))
 ```
@@ -171,7 +186,8 @@ Putting it all together! *Pipes `%>%`. You can perform calculations (summarize, 
 ```{r magrittr::pipes, echo=FALSE}
 
 filter(data, species %in% fivespp) %>%
-  summarise(max(depth))
+  summarise(depth = max(depth)) %>%
+  mutate(new.depth = log10(depth))
 
 filter(data, species %in% fivespp) %>%
   summarise(n_distinct(species))
@@ -195,7 +211,9 @@ numspp<-data %>%
 Instead of creating a new data.frame with `summarise`, you can add a column using `mutate`
 
 ```{r}
-new.data <- data %>% group_by(superorder) %>% mutate(mean.brain = mean(brain.mass)) %>%
+new.data <- data %>% 
+  group_by(superorder) %>% 
+  mutate(mean.brain = mean(brain.mass)) %>%
   mutate(brain.diff = brain.mass-mean.brain) %>%
   group_by(.) %>% #This step removes the previous group_by statement to return values for each row
   select(species, brain.diff)
@@ -207,22 +225,35 @@ glimpse(new.data)
 Create a new database that summarizes `data` and has a new column that counts the number of species that are lecithotrophic or matrotrophic. Use the `names(data)` to see the column names and use the `length` function to count the number of species. 
 
 ```{r}
-
+numbspp <- data %>%
+  group_by(reproductive.mode) %>%
+  summarise(NumSppp = length(species))
 ```
 
 Create a new database that calculates the mean `brain.mass` of the four superorders BUT EXCLUDE the Carcharhiniformes. 
 
 ```{r}
 
+notcarch <- filter(data, order != "Carcharhiniformes") %>%
+  group_by(order) %>%
+  mutate(mean.brain.mass = mean(brain.mass))
 
 ```
 
 
 ### Pipe challenge!
 
-When working within the tidyverse you can combine packages (dplyr and ggplot). Using this idea can you create a plot of the realtive difference in body mass over depth, with a different color for each superorder.
+When working within the tidyverse you can combine packages (dplyr and ggplot). Using this idea can you create a plot of the relative difference in body mass over depth, with a different color for each superorder.
 
 ```{r}
+ data %>% 
+  group_by(superorder) %>% 
+  mutate(mean.body = mean(body.mass)) %>%
+  mutate(body.diff = body.mass-mean.body) %>%
+  group_by(.) %>% #This step removes the previous group_by statement to return values for each row
+  ggplot(aes(x = depth, y = body.diff)) +
+  geom_point(aes(color = superorder)) +
+  facet_wrap(~superorder)
 
 
 ```

@@ -1,0 +1,379 @@
+---
+title: "More Data Wrangling and Tidy Data Sets"
+author: "C Mull"
+date: "16/02/2022"
+output:
+  html_document:
+    depth: 5
+    highlight: pygments
+    number_sections: no
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+subtitle: Dal Biology Grad Module
+editor_options: 
+  chunk_output_type: console
+---
+
+
+### More Data Wrangling Tidy Data
+
+Today we will wrap up a few more aspects of wrangling data and creating tidy data sets. Much of what we cover today can be found in [R for Data Science](https://r4ds.had.co.nz/index.html) book.
+
+Today we will cover:
+
+  * Strings
+  * Factors
+  * Dates and Times
+  * Reshaping data to make it tidy
+
+
+### Strings
+
+ Strings are vectors of characters. You can create strings with either single quotes or double quotes. When uploading data, columns that contain alpha numeric characters (EVEN IN A SINGLE CELL) will be traeted as a character, so always goodot check the class using `str()` or `dplyr::glimpse()`.
+ 
+```{r}
+string1 <- "This is a string"
+
+string2 <- 'If I want to include a "quote" inside a string, I use single quotes'
+```
+ 
+ Multiple strings are often stored in a character vector, which you can create with `c()`. This can be used to create lists that are then acted on using the `%in%` operator.
+ 
+ 
+```{r}
+c("one", "two", "three")
+
+#from yesterday's work on `filter()`
+
+#can also create a custom list to extract
+
+fivefamilies <- c("Carcharhinidae", "Lamnidae", "Dasyatidae", "Chimaeridae", "Urotrygonidae")
+
+data_5families <-  filter(data, family %in% fivefamilies)
+
+```
+ 
+ 
+Base R contains many functions to work with strings but we’ll avoid them because they can be inconsistent, which makes them hard to remember (ex: `grepl()` for replacement, `paste0()` for combining strings. `strigr` was developed as part of the tidyverse and is a bit more straightfoward to use. These have more intuitive names, and all start with str_. For example, str_length() tells you the number of characters in a string:
+
+
+```{r}
+str_length(c("a", "R for data science", NA))
+```
+
+By using `stringr()` commands you can easily take advantage of R Studio's autocomplete feature to see all available options.
+
+Type `str_` into the source chunk or console.
+
+Some common uses:
+
+Combining two or more strings, use str_c(): this is really useful when creating outputs in data.tables, model objects, MCMC chains using a standard naming format.
+
+```{r}
+str_c("x", "y")
+
+str_c("x", "y", "z")
+
+str_c("x", "y", sep = ", ")
+```
+
+Subsetting strings to pull out various bits of text.
+
+```{r}
+
+x <- c("Apple", "Banana", "Pear")
+str_sub(x, 1, 3)
+
+# negative numbers count backwards from end
+str_sub(x, -3, -1)
+
+#can change the cases
+
+str_sub(x, 1, 1) <- str_to_lower(str_sub(x, 1, 1))
+x
+
+```
+
+`str_dectect()` can be used to find instances that match a pattern, very useful for filtering.
+
+```{r}
+#returns a logical vector which can be acted upon.
+x <- c("apple", "banana", "pear")
+str_detect(x, "e")
+
+# How many common words start with t?
+sum(str_detect(words, "^t")) #here is the ^anchor the search at the start of the word
+
+# What proportion of common words end with a vowel?
+mean(str_detect(words, "[aeiou]$")) #here the $ anchors the search at the end of the word
+
+
+```
+
+`str_detect()` is really powerful for findings instances that match a pattern and subsetting or filtering based on this:
+
+```{r}
+
+words[str_detect(words, "x$")]
+
+str_subset(words, "x$")
+
+df <- tibble(
+  word = words, 
+  i = seq_along(word) #indexing...or searching for the row number
+)
+df %>% 
+  filter(str_detect(word, "x$"))
+```
+
+
+Replacing
+
+`str_replace()` and `str_replace_all()` allow you to replace matches with new strings. The simplest use is to replace a pattern with a fixed string:
+
+```{r}
+x <- c("apple", "pear", "banana")
+str_replace(x, "[aeiou]", "-")
+
+str_replace_all(x, "[aeiou]", "-")
+```
+
+
+With `str_replace_all()` you can perform multiple replacements by supplying a named vector. This can be really useful when recoding character values in a dataframe.
+
+```{r}
+x <- c("1 house", "2 cars", "3 people")
+str_replace_all(x, c("1" = "one", "2" = "two", "3" = "three"))
+```
+
+There are tons of this you can do with the `stringr` package to work with and manipulate strings. 
+
+
+### Factors
+ The `forcats` package has lots of tools for working with factors. And while I won't go into them here one of the most useful functions for controling factors is being able to control the order of them. This is really useful for models when you want to set one factor level as the baseline (ex. treatment) of if you want to plot factors in a certain order.
+ 
+```{r}
+
+x1 <- c("Dec", "Apr", "Jan", "Mar")
+
+x1
+
+sort(x1)
+```
+ 
+To create a factor you must start by creating a list of the valid levels:
+
+```{r}
+
+month_levels <- c(
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+)
+
+
+y1 <- factor(x1, levels = month_levels)
+y1
+
+sort(y1)
+```
+
+
+### Dates and times
+
+Often in ecology we deal with data from specific dates and times. This can be a real pain to handle in data software like excel, but `lubridate` has a suite of functions for quickly standardizing. Usually this info will be provided in `string` format when containing alpha numeric characters. All you might need is some idea of what order the information appears in your values.
+
+```{r}
+ymd("2017-01-31")
+
+mdy("January 31st, 2017")
+
+dmy("31-Jan-2017")
+
+ymd(20170131)
+
+#can also add specific times of day in hours minutes and seconds
+
+ymd_hms("2017-01-31 20:11:59")
+
+mdy_hm("01/31/2017 08:01")
+```
+
+
+Time data can also be compiled from individual components.
+
+```{r}
+
+
+flights %>% 
+  select(year, month, day, hour, minute)
+
+
+```
+
+To create a date/time from this sort of input, use make_date() for dates, or make_datetime() for date-times:
+
+```{r}
+
+flights %>% 
+  select(year, month, day, hour, minute) %>% 
+  mutate(departure = make_datetime(year, month, day, hour, minute))
+
+```
+
+For subsetting values to specific time periods you can also extract specific components. You can pull out individual parts of the date with the accessor functions `year()`, `month()`, `mday()` (day of the month), `yday()` (day of the year), `wday()` (day of the week), `hour()`, `minute()`, and `second()`.
+
+
+```{r}
+datetime <- ymd_hms("2016-07-08 12:34:56")
+
+year(datetime)
+
+month(datetime)
+
+mday(datetime)
+
+yday(datetime)
+
+wday(datetime)
+
+```
+
+### Tidy Data
+
+One crucial aspect of data wrangling is creating tidy data sets. There are three main rules for tidy data: 
+    * Each variable must have its own column.
+    * Each observation must have its own row.
+    * Each value must have its own cell.
+
+Following these rules is important for formatting data in a way that R can understand, especially as you try to develop and run models. Let's take a look at some different data layouts for the same data. Each of the datasets shows the same values of four variables `country`, `year`, `population`, and `cases`, but each dataset organizes the values in a different way.
+
+```{r setup, include=FALSE}
+# A nice tidy table where every variable is in a column
+table1
+
+#Untidy with a type and count column, both cases and population are spread between columns
+table2
+
+#untidy with cases and population in the same column
+table3
+
+# spread across two tables
+table4a
+table4b
+```
+
+
+
+### Pivoting
+
+Pivot provides a nice way to reshape our data into the format we would like. Typically when pivoting a dataset we will be pivoting from a wide format to a long format for easier use and manipulation in R.
+
+Data is often organized to make data entry easier, but this is not always ideal for analysis. This often results in two comon problems where one variable might be spread across multiple columns, spread across multiple rows, or column names may contain values. We can fix these common issues by pivoting using `pivot_longer` and `pivot_wider`.
+
+## Pivot_longer
+
+Common when dowloading large daasets including time-series are when columns names contain *values* of a variable. Take table4a: the column names 1999 and 2000 represent values of the year variable, the values in the 1999 and 2000 columns represent values of the cases variable, and each row represents two observations, not one. Here we need to move the column names to a column called `year` and the column values to a column called `cases`.
+
+The columns to pivot are specified with `dplyr::select()` notation so refer to Data Wrangling and Pipes from yesterday's code for examples on syntax.
+
+```{r pivot_longer, echo=FALSE}
+table4a %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+```
+
+
+`pivot_longer()` makes datasets longer by increasing the number of rows and decreasing the number of columns. We can use `pivot_longer()` to tidy table4b in a similar fashion. The only difference is the variable stored in the cell values:
+
+```{r pivot_longer_2, echo=FALSE}
+table4b %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "population")
+```
+
+
+To combine the tidied versions of table4a and table4b into a single tibble, we  use dplyr::left_join(), which we learned about in Data Wrangling and Pipes yesterday. Now we have all cases in a tibble similar to table1.
+
+```{r pivot and join, echo=FALSE}
+tidy4a <- table4a %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "cases")
+tidy4b <- table4b %>% 
+  pivot_longer(c(`1999`, `2000`), names_to = "year", values_to = "population")
+left_join(tidy4a, tidy4b)
+```
+
+
+## Pivot Wider
+
+`pivot_wider()` is the opposite of `pivot_longer()`. You use it when an observation is scattered across multiple rows. For example, take table2: an observation is a country in a year, but each observation is spread across two rows. Here we need:
+
+  1. The column to take variable names from. Here, it’s `type`.
+  
+  2. The column to take values from. Here it’s `count`.
+
+
+```{r pivot wider, echo=FALSE}
+table2
+
+table2 %>%
+    pivot_wider(names_from = type, values_from = count)
+```
+
+
+### Separating and Uniting
+
+`table3` has a different problem: we have one column (`rate`) that contains two variables (`cases` and `population`). To fix this problem, we’ll need the `separate()` function. You’ll also learn about the complement of `separate()`: `unite()`, which you use if a single variable is spread across multiple columns.
+
+`separate()` pulls apart one column into multiple columns, by splitting wherever a separator character appears. Take `table3`, The `rate` column contains both `cases` and `population` variables, and we need to split it into two variables. `separate()` takes the name of the column to separate, and the names of the columns to separate into
+
+```{r separate, echo=FALSE}
+ table3
+
+table3 %>% 
+  separate(rate, into = c("cases", "population"))
+```
+
+By default, `separate()` will split values wherever it sees a non-alphanumeric character (i.e. a character that isn’t a number or letter). For example, in the code above, `separate()` split the values of `rate` at the forward slash characters. If you wish to use a specific character to separate a column, you can pass the character to the `sep` argument of `separate()`. For example, we could rewrite the code above. Note that by default `separate()` will calssify new columns as characters. You can control this using the optional argument `convert = TRUE` or mutating following separating.
+
+```{r separate 2, echo=FALSE}
+table3 %>% 
+  separate(rate, into = c("cases", "population"), sep = "/")
+```
+
+You can also pass a vector of integers to `sep`. `separate()` will interpret the integers as positions to split at. Positive values start at 1 on the far-left of the strings; negative value start at -1 on the far-right of the strings. When using integers to separate strings, the length of `sep` should be one less than the number of names in `into`.
+
+You can use this arrangement to separate the last two digits of each year.
+
+```{r separate 3, echo=FALSE}
+table3 %>% 
+  separate(year, into = c("century", "year"), sep = 2)
+```
+
+
+## Unite
+
+`unite()` is the inverse of `separate()`: it combines multiple columns into a single column. You’ll need it much less frequently than `separate()`, but it’s still a useful tool to have in your back pocket. We can use `unite()` to rejoin the `century` and `year` columns that we created in the last example. That data is saved as `tidyr::table5`. `unite()` takes a data frame, the name of the new variable to create, and a set of columns to combine, again specified in `dplyr::select()` style:
+
+```{r unite, echo=FALSE}
+
+table5 %>% 
+  unite(new, century, year)
+
+ #default places an underscore, can control with the sep option.
+table5 %>% 
+  unite(new, century, year, sep = "")
+
+```
+
+
+## Challenge
+
+Load in the dataset `FAO.csv` a snapshot of global landings of sharks and rays. Create a tidy dataset of total catches per year for each country, but only for countries in Europe. 
+
+```{r}
+
+```
+

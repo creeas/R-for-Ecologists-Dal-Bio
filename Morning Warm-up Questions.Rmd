@@ -6,18 +6,29 @@ output: html_document
 ---
 
 #Morning warm-ups
+
 The following sections are just some warm-up questions for us to do together each morning to get our brains working and refresh what we covered the previous day.
 
 
 ```{r}
 # Load cetacean.csv
+getwd()
 
+data <- read.csv("Data/Cetaceans.csv")
 
 #Subset data to only include those entries from Scotland
 
+names(data)
+class(data$Age)
+str(data)
+
+scots <- subset(data, Location == "Scotland")
 
 #How many entries are in the database?
 
+length(scots)
+dim(scots)
+str(scots)
 
 #How many unique species are in the Scotland database?
 
@@ -57,17 +68,60 @@ The following sections are just some warm-up questions for us to do together eac
 ```{r brain size data}
 #how do I load my `abalone.csv` file and create a new dataframe?
 
+data <- read.csv("Data/abalone.csv")
 ```
 
 ## Including Plots
 
 ```{r plotting}
 #how do I plot the entire dataset for an exploratory check?
+plot(data)
 
 #how do I plot Whole Weight over age?
+plot(WholeWeight ~ Rings, data = data)
 
 #how do I change this plot to distinguish between males and females?
+males <- subset(data, Sex == "M")
+females <- subset(data, Sex == "F")
+
+plot(WholeWeight ~ Rings, data = females, xlim=range(data$Rings), ylim=range(data$WholeWeight), pch=19, col=alpha("red", 0.25), cex=1)
+
+points(WholeWeight ~ Rings, data = males, xlim=range(data$Rings), ylim=range(data$WholeWeight), pch=19, col=alpha("blue", 0.25), cex=1)
 
 #how can I create separate plots for males and females using facets in ggplot?
+
+ggplot(data, aes(Rings, WholeWeight)) +
+  geom_point(aes(color=Sex)) +
+  facet_grid(~Sex)
+```
+
+
+## Data Wrangling
+
+```{r}
+#load the shark and ray brain size data file as an object call bs
+
+
+#Plot the entire data set for exploration and hypothesis generation
+
+
+#Create a new column that is a combination of telencephalon size and medulla size
+
+
+#Create a new database that summarizes `bs` and has columns that count the number of species and mean body mass per habitat type. Hint: use `group_by` `summarize`.
+
+
+
+
+```
+
+
+### Pipe challenge!
+
+When working within the tidyverse you can combine packages (dplyr and ggplot). Using this idea can you create a plot of the relative difference in body mass over depth, with a different color for each superorder.
+
+```{r}
+
+
 ```
 
