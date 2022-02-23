@@ -14,10 +14,10 @@ output:
     toc: yes
   word_document:
     toc: yes
-subtitle: cRash course iFisheries lab
+subtitle: Dalhousie Biology Grad Module
 ---
 
-# Introduction to Statistics in R 2021
+# Introduction to Statistics in R 2022
 
 For this excercice we will be using the abalone dataset developed by Sam Waugh (1995) "Extending and benchmarking Cascade-Correlation", PhD thesis, Computer Science Department, University of Tasmania. This data set was used to look at predicting the age of abalone from easily gathered morphometric information. The dataset is comprised of 4177 observation of 9 variables with no missing values.
 
@@ -27,7 +27,7 @@ abalone <- read.csv("Data/abalone.csv")
 
 ## Inspect the dataset
 
-Before starting an analysis is is a great idea to inspect our data set using 'plot()', 'summary()', and 'str()' to get a sense of how the data is structured.
+Before starting an analysis is is a great idea to inspect our data set using `'plot()'`, `'summary()'`, and `'str()'` to get a sense of how the data is structured. If we are working in the tidyverse we can also use `dplyr::glimpse()`.
 
 Plotting a dataset can be really helpful for spotting patterns and doing very quick checks of your hypotheses.
 
@@ -35,7 +35,7 @@ Plotting a dataset can be really helpful for spotting patterns and doing very qu
 plot(abalone)
 ```
 
-Summary will give a quick glimpse of suuamry statistics for each column in your dataset.
+`summary()` will give a quick glimpse of summary statistics for each column in your dataset.
 
 ```{r summary(), echo=FALSE}
 summary(abalone)
@@ -64,7 +64,7 @@ shapiro.test(abalone$Length)
 
 
 ## Correlation
-Correlation tests for a link between two paired *continuous* variables. The strength of this link is represented by the correlation coefficient r, which is bound be -1 and 1. This can be carried out in R using the function cor.test(). You can learn more about the correlation function using `?cor.test`. Remember that correlation does NOT imply causation! Two variable can be correlated that are not truely related.
+Correlation tests for a link between two paired *continuous* variables. The strength of this link is represented by the correlation coefficient r, which is bound be -1 and 1. This can be carried out in R using the function `cor.test()`. You can learn more about the correlation function using `?cor.test`. Remember that correlation does NOT imply causation! Two variable can be correlated that are not truly related.
 
 ```{r correlation test, echo=FALSE}
 ?cor.test
@@ -74,7 +74,7 @@ cor.test(abalone$Length, abalone$Height)
 cor.test(abalone$Length, abalone$WholeWeight)
 ```
 
-Are these traits correlated? What does the p-value explicity tell us here?
+Are these traits correlated? What does the p-value explicitly tell us here?
 
 Challenge: Is length more strongly correlated to diameter or age? 
 
@@ -85,7 +85,7 @@ Challenge: Is length more strongly correlated to diameter or age?
 
 Is length correlated with X? Is there any problem with this?
 
-```{r spurious correlation}
+```{r spurious correlation, echo=FALSE}
 #excercise
 ```
 
@@ -97,7 +97,7 @@ T-test is useful for testing for the difference in means between **2** samples, 
 t.test(abalone$WholeWeight~abalone$Sex)
 ```
 
-The error message is telling you that you have more than 2 levels, ie more than two sexes in your database. Therefore subset the database to include only males and females.
+The error message is telling you that you have more than 2 levels, i.e. more than two sexes in your database. Therefore subset the database to include only males and females.
 
 ```{r subsetting, echo=FALSE}
 #excercise
@@ -111,6 +111,7 @@ t.test(adult.abs$WholeWeight~adult.abs$Sex)
 
 
 ## ANalysis Of VAriance
+
 ANOVA is similar to a t-test, but for testing for differences between more than 2 groups. This test works by comparing the common variance within groups with the between group variance. The F-statistic is calculated by the ratio: SS-between/SS-within. Try an anova to test for difference in whole mass between all sexes. NOTE: Make sure subject column is a factor, so that it's not treated as a continuous variable.
 
 ```{r}
@@ -145,4 +146,48 @@ TukeyHSD(aov1)
 
 Which groups are different?
 
-One very important thing to remember is that ANOVAs were originally designed for balanced samples (ie. the same number of samples per group or treatment). So this an important thing to keep in mind when interpretting your results.
+One very important thing to remember is that ANOVAs were originally designed for balanced samples (ie. the same number of samples per group or treatment). So this an important thing to keep in mind when interpreting your results.
+
+
+### Linear models/regressions
+
+The `lm()` function provides the basic functionality in R to do simple linear regressions. It is a very important
+function to understand given that most other analyses (GLMS, mixed-effect models, etc.) use the same syntax as
+the `lm()` function (the formula structure), and are basically extensions of it.
+
+Run a linear model with the `lm()` function. 
+```{r}
+lm(Petal.Width ~ Petal.Length, data = iris)
+```
+
+Create a plot that has Petal Width on the y-axis and Petal Length on the x-axis. 
+```{r}
+
+plot(Petal.Width ~ Petal.Length, data = iris)
+
+```
+
+
+Plot the data, make it look good, add a title etc. Add a line that shows the model outputs 
+using the `abline` function with the `lm` function nested within it. We are also using the 
+`plot` function from base R, which as you can see is less intuitive than `ggplot`:
+
+```{r}
+
+plot(Petal.Width ~ Petal.Length, data = iris, pch = 21, 
+     bg = c("red","green3","blue")[unclass(iris$Species)], 
+     main = "Iris Petals", xlab = "Petal Length", ylab = "Petal Width")
+
+abline(lm(Petal.Width ~ Petal.Length, data = iris), col = "black")
+
+```
+
+
+## LM Challenge
+
+Run a liner model of Sepal Width over Petal Width and plot this over the data.
+
+```{r pressure, echo=FALSE}
+
+```
+

@@ -1,0 +1,185 @@
+---
+title: "Rworkshop Functions"
+author: 'C Mull'
+date: 'Feb 2022'
+output:
+  html_document:
+    depth: 5
+    highlight: pygments
+    number_sections: no
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+subtitle: Dalhousie Biology Grad Module
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE) 
+```
+
+## Functions
+
+One of the powerful aspects of programming language is the ability to write your own functions. You are already familiar with functions as these are commonly used in R either as base functions preloaded such as `base::plot()` used to plot data or as the functions available in different libraries such as `dplyr::filter()`. You can also write your own user defined functions (UDFs).
+
+In programming, you use functions to incorporate sets of instructions that you want to use repeatedly or that, because of their complexity, are better self-contained in a sub program and called when needed. In practice in ecology and biology functions are really useful for incorporating into your workflow if you have a complicated data wrangling process, when you need to perform repeated tasks on muctiple dataframes, or when you want to carry out standardized post processing of model objects or even creating plots!
+
+Basically a function will take an input and produce a specified output. In R, according to the base docs, you define a function with the construct:
+
+`function (arglist)  {body}`
+
+When running predefined functions we are simply concerned with the name and the `(arglist)` and don't need to worry too much about the body.
+
+## User Defined Functions
+
+Whether you need to accomplish a particular task and don't know of a dedicated function or library and decide to devleop your own you will write something like this:
+
+
+```{r basic UDF, eval=FALSE}
+
+function.name <- function(arguments) 
+{
+  computations on the arguments
+  some other code
+}
+
+```
+
+
+So a function has a name `function.name`, some arguments used as input to the function `arguments`, within the () following the keyword ‘function’; a `body`, which is the code within the curly braces {}, where you carry out the computation. You can have one or more return values (the output). You define the function similarly to variables, by “assigning” the directive `function(arguments)` to the “variable” `function.name`, followed by the rest.
+
+Let's try and simple example:
+
+```{r First Function}
+
+# Define a simple function
+myFirstFun<-function(n)
+{
+  # Compute the square of integer `n`
+  n*n
+}
+
+# Assign `10` to `k`
+k <- 10
+
+# Call `myFirstFun` with that value
+m <- myFirstFun(k)
+
+# Call `m` 
+m
+
+
+#functions can also be performed on vectors, lists, matrices...
+l <- c(5,10,15)
+m <- myFirstFun(l)
+m
+```
+
+
+Make sure that the name that you choose for the function is not an R reserved word. This means that you, for example, don’t want to pick the name of an existing function for your own UDF, because it can cause you a lot of headaches since R will not know whether you mean your recently defined UDF or the existing function that was loaded with one of the libraries.
+
+One of the ways to avoid this is by using the help system: if you get some information back by entering `? OurFunctionName`, you know it is better not to use that name because it has already been taken.
+
+When the script for functions becomes long, or you don't want it cluttering up your document you can call in other functions using the command `source()`:
+
+`source("AmazingFunction.R")`
+
+Writing a function has three big advantages over using copy-and-paste:
+
+  1. You can give a function an evocative name that makes your code easier to understand.
+
+  2. As requirements change, you only need to update code in one place, instead of many.
+
+  3. You eliminate the chance of making incidental mistakes when you copy and paste (i.e. updating a variable name in one place, but not in another).
+  
+### When should your write a function?  
+
+You should consider writing a function whenever you’ve copied and pasted a block of code more than twice (i.e. you now have three copies of the same code). For example, take a look at this code. What does it do?
+
+```{r copy pasted data}
+
+df <- tibble::tibble(
+  a = rnorm(10),
+  b = rnorm(10),
+  c = rnorm(10),
+  d = rnorm(10)
+)
+
+df$a <- (df$a - min(df$a, na.rm = TRUE)) / 
+  (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+df$b <- (df$b - min(df$b, na.rm = TRUE)) / 
+  (max(df$b, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+df$c <- (df$c - min(df$c, na.rm = TRUE)) / 
+  (max(df$c, na.rm = TRUE) - min(df$c, na.rm = TRUE))
+df$d <- (df$d - min(df$d, na.rm = TRUE)) / 
+  (max(df$d, na.rm = TRUE) - min(df$d, na.rm = TRUE))
+
+```
+
+
+You might be able to puzzle out that this rescales each column to have a range from 0 to 1. But did you spot the mistake? I made an error when copying-and-pasting the code for df$b: I forgot to change an a to a b. Extracting repeated code out into a function is a good idea because it prevents you from making this type of mistake.
+
+To write a function you need to first analyse the code. How many inputs does it have?
+
+```{r inputs}
+
+(df$a - min(df$a, na.rm = TRUE)) /
+  (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+```
+
+This code only has one input: `df$a`. To make the inputs more clear, it’s a good idea to rewrite the code using temporary variables with general names. Here this code only requires a single numeric vector, so I’ll call it x:
+
+```{r inputs 2}
+
+x <- df$a
+(x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+
+```
+
+
+There is some duplication in this code. We’re computing the range of the data three times, so it makes sense to do it in one step:
+
+```{r less verbose code}
+
+rng <- range(x, na.rm = TRUE)
+(x - rng[1]) / (rng[2] - rng[1])
+
+```
+
+Pulling out intermediate calculations into named variables is a good practice because it makes it more clear what the code is doing. Now that I’ve simplified the code, and checked that it still works, I can turn it into a function:
+
+```{r Second Function}
+
+rescale01 <- function(x) {
+  rng <- range(x, na.rm = TRUE)
+  (x - rng[1]) / (rng[2] - rng[1])
+}
+
+
+rescale01(c(0, 5, 10))
+
+```
+
+
+There are three key steps to creating a new function:
+
+  1. You need to pick a name for the function. Here I’ve used rescale01 because this function rescales a vector to lie between 0 and 1.
+
+  2. You list the inputs, or arguments, to the function inside function. Here we have just one argument. If we had more the call would look like function(x, y, z).
+
+  3. You place the code you have developed in body of the function, a { block that immediately follows function(...).
+
+Note the overall process: I only made the function after I’d figured out how to make it work with a simple input. It’s easier to start with working code and turn it into a function; it’s harder to create a function and then try to make it work.
+
+
+### Function Challenge
+
+Can you write a function that would return the min, maximum, and mean values of a numerical vector?
+
+```{r function challenge}
+
+```
+

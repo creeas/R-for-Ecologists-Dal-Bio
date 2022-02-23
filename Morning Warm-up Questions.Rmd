@@ -157,3 +157,36 @@ bs %>%
 
 ```
 
+
+## Welcome back
+
+```{r}
+
+# Load in the shark brain data set `brain.data.csv` data set
+
+
+# How do we examine the dataset to see the dimensions, number and names of variables, and the classes of each variable?
+
+# plot telencephalon over brain.mass
+
+
+# Recreate the plot but with habitat type signified by color
+
+
+# Remove all of the deep water species and recreate the plot but with reproductive mode signified by color
+
+
+# Create a character vector that is every level of class in the `brain.data` set combined
+#HINT use str_
+
+
+# Just to be silly can you replace all of the vowels with question marks
+
+
+# If we have untidy data where a single row contains multiple observations, which is common with large entered data sets, how would we reshape this into a tidy format? HINT see tidyr::table4a for a simple example.
+
+
+
+
+```
+
