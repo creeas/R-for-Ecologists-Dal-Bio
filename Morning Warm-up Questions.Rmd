@@ -164,29 +164,71 @@ bs %>%
 
 # Load in the shark brain data set `brain.data.csv` data set
 
+bd <- read.csv("Data/brain.data.csv")
 
 # How do we examine the dataset to see the dimensions, number and names of variables, and the classes of each variable?
 
+str(bd)
+names(bd)
+glimpse(bd)
+
 # plot telencephalon over brain.mass
 
+plot(bd$telencephalon ~ bd$brain.mass)
+
+ggplot(bd, aes(brain.mass, telencephalon)) +
+  geom_point()
 
 # Recreate the plot but with habitat type signified by color
 
+ggplot(bd, aes(brain.mass, telencephalon)) +
+  geom_point(aes(color=habitat))
 
 # Remove all of the deep water species and recreate the plot but with reproductive mode signified by color
 
+bd %>%
+  filter(habitat != "Deep") %>%
+  ggplot(aes(brain.mass, telencephalon)) +
+           geom_point(aes(color=reproductive.mode))
 
 # Create a character vector that is every level of class in the `brain.data` set combined
 #HINT use str_
 
+unique(bd$class)
+
+x <- str_c("Batoids" ,  "Sharks",    "Chimaeras", sep = " ")
 
 # Just to be silly can you replace all of the vowels with question marks
 
+str_replace_all(x,"[aeiou]","$")
 
 # If we have untidy data where a single row contains multiple observations, which is common with large entered data sets, how would we reshape this into a tidy format? HINT see tidyr::table4a for a simple example.
 
+tidyr::table4a
+
+pivot_longer()
+```
 
 
+## Last Day...you'r almost an expert!
+
+```{r}
+
+# load in the abalone dataset
+
+# Which is more strongly correlated: Length and Height or Whole Weight and Shucked Weight?
+
+# Run a linear regression of Shucked Weight over Length:
+
+# What is the slope?
+
+# What is the intercept?
+
+# What are the p-values telling us?
+
+# Does this regression vary by Sex? How would you check? 
+
+# Plot Shucked Weight over Length and color by sex:
 
 ```
 

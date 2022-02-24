@@ -25,7 +25,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 One of the powerful aspects of programming language is the ability to write your own functions. You are already familiar with functions as these are commonly used in R either as base functions preloaded such as `base::plot()` used to plot data or as the functions available in different libraries such as `dplyr::filter()`. You can also write your own user defined functions (UDFs).
 
-In programming, you use functions to incorporate sets of instructions that you want to use repeatedly or that, because of their complexity, are better self-contained in a sub program and called when needed. In practice in ecology and biology functions are really useful for incorporating into your workflow if you have a complicated data wrangling process, when you need to perform repeated tasks on muctiple dataframes, or when you want to carry out standardized post processing of model objects or even creating plots!
+In programming, you use functions to incorporate sets of instructions that you want to use repeatedly or that, because of their complexity, are better self-contained in a sub program and called when needed. In practice in ecology and biology functions are really useful for incorporating into your workflow if you have a complicated data wrangling process, when you need to perform repeated tasks on mutiple dataframes, or when you want to carry out standardized post processing of model objects or even creating plots!
 
 Basically a function will take an input and produce a specified output. In R, according to the base docs, you define a function with the construct:
 
@@ -35,7 +35,7 @@ When running predefined functions we are simply concerned with the name and the 
 
 ## User Defined Functions
 
-Whether you need to accomplish a particular task and don't know of a dedicated function or library and decide to devleop your own you will write something like this:
+Whether you need to accomplish a particular task and don't know of a dedicated function or library and decide to develop your own you will write something like this:
 
 
 ```{r basic UDF, eval=FALSE}
@@ -46,6 +46,8 @@ function.name <- function(arguments)
   some other code
 }
 
+
+function.name(x)
 ```
 
 
@@ -56,7 +58,7 @@ Let's try and simple example:
 ```{r First Function}
 
 # Define a simple function
-myFirstFun<-function(n)
+myFirstFun <- function(n)
 {
   # Compute the square of integer `n`
   n*n
@@ -76,6 +78,8 @@ m
 l <- c(5,10,15)
 m <- myFirstFun(l)
 m
+
+source("function.R")
 ```
 
 
@@ -111,7 +115,7 @@ df <- tibble::tibble(
 df$a <- (df$a - min(df$a, na.rm = TRUE)) / 
   (max(df$a, na.rm = TRUE) - min(df$a, na.rm = TRUE))
 df$b <- (df$b - min(df$b, na.rm = TRUE)) / 
-  (max(df$b, na.rm = TRUE) - min(df$a, na.rm = TRUE))
+  (max(df$b, na.rm = TRUE) - min(df$b, na.rm = TRUE))
 df$c <- (df$c - min(df$c, na.rm = TRUE)) / 
   (max(df$c, na.rm = TRUE) - min(df$c, na.rm = TRUE))
 df$d <- (df$d - min(df$d, na.rm = TRUE)) / 
@@ -161,12 +165,16 @@ rescale01 <- function(x) {
 
 rescale01(c(0, 5, 10))
 
+df$a <- rescale01(df$a)
+
+rescale01(df)
+
 ```
 
 
 There are three key steps to creating a new function:
 
-  1. You need to pick a name for the function. Here I’ve used rescale01 because this function rescales a vector to lie between 0 and 1.
+  1. You need to pick a name for the function. Here I’ve used rescale01 because this function rescales a vector to lie between 0 and
 
   2. You list the inputs, or arguments, to the function inside function. Here we have just one argument. If we had more the call would look like function(x, y, z).
 
@@ -180,6 +188,18 @@ Note the overall process: I only made the function after I’d figured out how t
 Can you write a function that would return the min, maximum, and mean values of a numerical vector?
 
 ```{r function challenge}
+
+v <- rnorm(10)
+
+BasicMaths <- function(x) {
+  my.list <- list(min(x), max(x), mean(x))
+  names(my.list) <- c("Min", "Max", "Mean")
+  my.list
+}
+
+BasicMaths(v)
+
+source("BasicMaths.R")
 
 ```
 

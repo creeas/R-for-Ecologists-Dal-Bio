@@ -80,6 +80,9 @@ Challenge: Is length more strongly correlated to diameter or age?
 
 ```{r correlation challenge, echo=FALSE}
 #excercise
+
+cor.test(abalone$Length, abalone$Diameter)
+cor.test(abalone$Length, abalone$Rings)
 ```
 
 
@@ -87,6 +90,7 @@ Is length correlated with X? Is there any problem with this?
 
 ```{r spurious correlation, echo=FALSE}
 #excercise
+cor.test(abalone$Length, abalone$X)
 ```
 
 
@@ -101,12 +105,16 @@ The error message is telling you that you have more than 2 levels, i.e. more tha
 
 ```{r subsetting, echo=FALSE}
 #excercise
+library(tidyverse)
+
+new <- abalone %>%
+  filter(Sex != "I")
 ```
 
 Now run the t.test on the reduced dataset.
 
 ```{r t.test adults, echo=FALSE}
-t.test(adult.abs$WholeWeight~adult.abs$Sex)
+t.test(new$WholeWeight~new$Sex)
 ```
 
 
@@ -157,13 +165,18 @@ the `lm()` function (the formula structure), and are basically extensions of it.
 
 Run a linear model with the `lm()` function. 
 ```{r}
-lm(Petal.Width ~ Petal.Length, data = iris)
+model <- lm(Petal.Width ~ Petal.Length, data = iris)
+summary(model)
+
+model2 <- lm(Petal.Width ~ Petal.Length:Species, data = iris)
+summary(model2)
 ```
 
 Create a plot that has Petal Width on the y-axis and Petal Length on the x-axis. 
 ```{r}
 
 plot(Petal.Width ~ Petal.Length, data = iris)
+abline(model)
 
 ```
 
@@ -189,5 +202,16 @@ Run a liner model of Sepal Width over Petal Width and plot this over the data.
 
 ```{r pressure, echo=FALSE}
 
+model <- lm(Sepal.Width ~ Petal.Width, data = iris)
+summary(model)
+
+plot(Sepal.Width ~ Petal.Width, data = iris, pch = 21, 
+     bg = c("red","green3","blue")[unclass(iris$Species)])
+abline(model)
 ```
 
+
+
+## Model Diagnostics
+
+R is really powerful for lot so f types of modelling, but =as with many of the data wrangling techniques we learned earlier R sort will not necessarily tell you in you are doing something wrong. In particular it's really important to pay attention to model assumptions and diagnostics to make sure you are performing the correct analyses and interprettng output correctly. A really important step that we often negelct are mode diagnostics. R has lots of functions for this in base R and

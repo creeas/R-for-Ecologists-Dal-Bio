@@ -1,0 +1,156 @@
+---
+title: "Model Diagnostics and Comaparison"
+author: "C Mull"
+date: "23/02/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSO)
+```
+
+## GLMs
+
+Yesterday we talked about linear models using `lm()` which is the simplest form of linear regression. This assumes a number of things: mainly that your data are a random sample from a normally distributed population. As such there isn't much flexibility. Most of the time you will be using fancier models, and the next step up is Generalized Linear Models using `glm()`. Generalized linear models identical to linear models in their default mode, but `glm()` allows you to fit different statistical models based on the type of data you are analyzing making it a bit more flexible. Some common families for `glm()` are `"gaussian"` for normally distributed data, `"poisson"` for count data, or `"binomial"` for logistic regression.
+
+Let's start with a basic example using the `mtcars` data set:
+
+```{r glm 1}
+
+plot(mtcars)
+
+glm1 <- glm(mpg ~ disp + hp, data=mtcars)
+summary(glm1)
+```
+
+One thing we can see is that `glm` returns the same values as `lm` on the same data, because base `glm` assumes a gaussian distribution just like `lm`:
+
+```{r glm and lm}
+
+lm(mpg ~ disp + hp, data=mtcars)
+glm(mpg ~ disp + hp, data=mtcars)
+
+```
+
+The power in glm lies in being more flexible and using different families for your analysis:
+
+```{r glm binomial}
+
+glm2 <- glm(am ~ disp + hp, data=mtcars, family=binomial)
+summary(glm2)
+
+# It is important for binomial family that your response variable is 0 and 1, otherwise you will get an error.
+
+```
+
+
+```{r glm poisson}
+
+glm3 <- glm(am ~ disp + hp, data=mtcars, family=poisson)
+summary(glm2)
+
+```
+
+
+Knowing which family to use depends on your data type so it is important to spend time looking over and understanding your data, and formulating a testable question before you dive into your analysis!
+
+
+## ANOVA vs LM vs GLM
+
+While these models can be confusing and it can be difficult to decide it helps to understand that many of them are just different deployments of the same basic idea. In fact an ANOVA is a linear model without a slope term (AKA an intercept only model) and a base glm is also a simple linear model. Lets look at the output of all three on the same data:
+
+```{r}
+
+#create a factor to work on
+df <- mtcars
+df$cyl <- as.factor(df$cyl)
+
+aov.cars <- aov(mpg~cyl, data = df)
+anova(aov.cars)
+model.tables(aov.cars, "means")
+
+lm.cars <- lm(mpg~cyl, data = df)
+summary(lm.cars)
+
+glm.cars <- glm(mpg~cyl, data = df)
+summary(glm.cars)
+```
+
+
+The really nice thing is that all of these models use the same sytax and return a similar output, which makes progressing to more complicated models less challenging. As you progress you may want to implement Generalized Linear Mixed models or GLMMs (you can use the `nlme` or `lme4` packages for this), use a model structure that provides more flexibilty with regards to family structures (e.g. zero inflated models), account for variance structures (e.g. phlyogentic relatedness in `caper::pgls()`), or go bayesian (e.g. `MCMCglmm` or `brms`). Once you have a basic handle this become much more intuitive. But some things to always remember:
+
+  * how operators work in a model (`+`, `*`, `:`)
+  * how R treats factors by default and how this affects your interpretation of coefficients
+  * p-values are uninformative in the absence of coefficient estimates
+
+
+
+## Model Diagnostics
+
+R is really powerful for lot so f types of modelling, but =as with many of the data wrangling techniques we learned earlier R sort will not necessarily tell you in you are doing something wrong. In particular it's really important to pay attention to model assumptions and diagnostics to make sure you are performing the correct analyses and interpreting output correctly. A really important step that we often negelct are mode diagnostics. R has lots of functions for this in base R and there are even newer packages such as `performance` which optimize this process.
+
+Some common things we look for in R model diagnostics are:
+
+  1. Linearity
+  2. Normality
+  3. Residual Variance
+  4. Influential Points
+  
+We will quickly go over what these diagnostics mean and how we should be looking at them, and these are typically done visually. 
+
+First let's create a linear model using `brain.data.csv`, and let's look at `brain mass` as a function of `body mass`:
+
+```{r}
+
+#run simple glm
+mod <- lm(brain.mass ~ body.mass, data=bd)
+summary(mod)
+```
+
+
+
+## Model Selection
+
+Okay so now we have run a few models and we want to compare them to decide which is the best model for our data. There are a number of informative things we can use to do so. The classic is r^2 which give a measure of goodness of fit of a model. the problem with this is that it tends to be biased towards more complex models so adding uninformative parameters may "improve" your model. A common step instead is to use Akaike's Information Criteria (AIC).
+
+Let's build a few models and compare:
+
+```{r}
+
+brain.1 <- glm(brain.mass ~ body.mass, data=bd)
+summary(brain.1)
+
+brain.2 <- glm(brain.mass ~ body.mass + reproductive.mode, data=bd)
+summary(brain.2)
+
+brain.3 <- glm(brain.mass ~ body.mass + habitat, data=bd)
+summary(brain.3)
+
+brain.4 <- glm(brain.mass ~ body.mass + reproductive.mode + habitat, data=bd)
+summary(brain.4)
+
+brain.5 <- glm(brain.mass ~ body.mass * habitat, data=bd)
+summary(brain.5)
+
+AIC(brain.1, brain.2, brain.3, brain.4, brain.5)
+
+```
+
+
+Information criteria are available for many different types of models AIC, wAIC, DIC, LOO. The choice depends on the type of model you are running.
+
+
+
+
+## Model Challenge
+
+Using the `mtcars` data fit a few models of `mpg` over `cyl`, `hp`, and `vs` and decide which predictors belong in your best model
+
+```{r}
+
+
+
+```
+
+
+

@@ -403,5 +403,12 @@ fao2 <- fao %>%
   summarise(`total catch` = sum(`total catch`)) %>%
   mutate(across("year",str_replace,"X",""))
 
+glimpse(fao2)
+
+fao2$year <- as.numeric(fao2$year)
+
+
+library(readr)
+marine_mammals <- read_csv("Data/Cetaceans.csv")
 ```
 
