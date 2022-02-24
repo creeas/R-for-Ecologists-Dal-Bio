@@ -11,9 +11,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Multipanel Plots
 
-This lesson was taken directly from the stats ninja [Sean Anderson](https://seananderson.ca/courses/11-multipanel/multipanel.pdf). See hsi website and follow his work for some amazing macroecology and analysis. He taught most of us R so all the credit for this lesson goes to him!
+This lesson was taken directly from the stats ninja [Sean Anderson](https://seananderson.ca/courses/11-multipanel/multipanel.pdf). See his website and follow his work for some amazing macroecology and analysis. He taught most of us R so all the credit for this lesson goes to him!
 
-Often times our graphics in papers will contain mutliple panels to conserve space or to show information we want coupled together. All of our plotting so far has been single panel, but now we want to put several together! Sean lay's out 5 main approaches for doing this:
+Often times our graphics in papers will contain multiple panels to conserve space or to show information we want coupled together. All of our plotting so far has been single panel, but now we want to put several together! Sean lay's out 5 main approaches for doing this:
 
   1. By hand: full control but time consuming and not reproducible.
   2. `grid graphics` with packages like `lattice` or `ggplot2`. Like we have discussed before these are great for quick and easy exploratory plotting. But there is less user control so these might not be ideal for final figures for papers.
@@ -25,8 +25,7 @@ The best method all depends on what works best for you as there is no right or w
 
 # Layers of complexity
 
-`par(mfrow)`, `layout()`, and `split.screen()` are all capable of basic equal-sized-panel grid layouts. If you think of creating a small multiple layout in R to be like putting screws into a wall: par(mfrow) would be the equivalent of grabbing your Leatherman to hang one picture frame — it’s all you need and it’s fast. layout() would be the equivalent of hunting around for a proper screwdriver to hang a bunch of picture frames. split.screen would be the equivalent of finding and plugging in your power drill — more of a hassle to set up, but much more powerful in the end. Don’t grab a tool that’s more complex than it needs to be, but don’t try and build
-a house with a Leatherman.
+`par(mfrow)`, `layout()`, and `split.screen()` are all capable of basic equal-sized-panel grid layouts. If you think of creating a small multiple layout in R to be like putting screws into a wall: par(mfrow) would be the equivalent of grabbing your Leatherman to hang one picture frame — it’s all you need and it’s fast. layout() would be the equivalent of hunting around for a proper screwdriver to hang a bunch of picture frames. split.screen would be the equivalent of finding and plugging in your power drill — more of a hassle to set up, but much more powerful in the end. Don’t grab a tool that’s more complex than it needs to be, but don’t try and build a house with a Leatherman.
 
 # Questions to ask yourself when making a plot
 
@@ -122,8 +121,7 @@ This can be used to create some very complex multipanel plots (see pdf).
 
 What if you want different panels to be different sizes and the sizes don’t correspond to some simple ratio that you could divide up with `layout()`? One common use for this is to keep the unit scales in different panels the same, without using extra margin space. `split.screen()` is only limited by your imagination and ability to figure out the co-ordinates of your plots.
 
-Split screen takes a set of vectors or a matrix to specify the layout. I typically use the matrix notation. In this case each row describes a screen with values for left, right, bottom, and top.1 0 corresponds to the left or bottom of the plot. 1 corresponds
-to the top or right of the plot. Sometimes it’s easiest to figure out this matrix in a spreadsheet before and then read it in as a .csv file. 
+Split screen takes a set of vectors or a matrix to specify the layout. I typically use the matrix notation. In this case each row describes a screen with values for left, right, bottom, and top. 0 corresponds to the left or bottom of the plot. 1 corresponds to the top or right of the plot. Sometimes it’s easiest to figure out this matrix in a spreadsheet before and then read it in as a .csv file. 
 
 First let’s generate a “simple” two-by-two layout with `split.screen()`.
 

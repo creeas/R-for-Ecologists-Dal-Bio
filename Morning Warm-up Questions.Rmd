@@ -210,25 +210,52 @@ pivot_longer()
 ```
 
 
-## Last Day...you'r almost an expert!
+## Last Day...you're almost an expert!
 
 ```{r}
 
 # load in the abalone dataset
 
+ab <- read.csv("Data/abalone.csv")
+str(ab)
+
 # Which is more strongly correlated: Length and Height or Whole Weight and Shucked Weight?
+
+cor.test(ab$Length, ab$Height)
+cor.test(ab$WholeWeight, ab$ShuckedWeight)
 
 # Run a linear regression of Shucked Weight over Length:
 
+ab.mod <- lm(ShuckedWeight ~ Length, data = ab)
+summary(ab.mod)
 # What is the slope?
+1.66
 
 # What is the intercept?
+-0.51
 
 # What are the p-values telling us?
 
+They are not 0.
+
 # Does this regression vary by Sex? How would you check? 
 
+ab.mod2 <- lm(ShuckedWeight ~ Length*Sex, data = ab)
+summary(ab.mod2)
+
+
 # Plot Shucked Weight over Length and color by sex:
+
+plot(ShuckedWeight ~ Length, data = ab, pch=19, 
+     col=factor(ab$Sex))
+abline(ab.mod2$coefficients[1], ab.mod2$coefficients[2])
+abline(ab.mod2$coefficients[1] + ab.mod2$coefficients[3],ab.mod2$coefficients[2] + ab.mod2$coefficients[5], col="red")
+abline(ab.mod2$coefficients[1] + ab.mod2$coefficients[4],ab.mod2$coefficients[2] + ab.mod2$coefficients[6], col="green")
+
+ggplot(ab, aes(Length, ShuckedWeight)) +
+  geom_point(aes(color=Sex)) +
+  geom_abline(intercept = ab.mod2$coefficients[1], slope =ab.mod2$coefficients[2])  +
+  geom_abline(intercept = -0.74+0.09, slope = 2.05-0.13)
 
 ```
 

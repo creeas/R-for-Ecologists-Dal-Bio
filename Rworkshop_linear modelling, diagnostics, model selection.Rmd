@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSO)
+knitr::opts_chunk$set(echo = FALSE)
 ```
 
 ## GLMs
@@ -46,8 +46,8 @@ summary(glm2)
 
 ```{r glm poisson}
 
-glm3 <- glm(am ~ disp + hp, data=mtcars, family=poisson)
-summary(glm2)
+glm3 <- glm(mpg ~ disp + hp, data=mtcars, family=poisson)
+summary(glm3)
 
 ```
 
@@ -77,7 +77,7 @@ summary(glm.cars)
 ```
 
 
-The really nice thing is that all of these models use the same sytax and return a similar output, which makes progressing to more complicated models less challenging. As you progress you may want to implement Generalized Linear Mixed models or GLMMs (you can use the `nlme` or `lme4` packages for this), use a model structure that provides more flexibilty with regards to family structures (e.g. zero inflated models), account for variance structures (e.g. phlyogentic relatedness in `caper::pgls()`), or go bayesian (e.g. `MCMCglmm` or `brms`). Once you have a basic handle this become much more intuitive. But some things to always remember:
+The really nice thing is that all of these models use the same sytax and return a similar output, which makes progressing to more complicated models less challenging. As you progress you may want to implement Generalized Linear Mixed models or GLMMs (you can use the `nlme` or `lme4` packages for this), use a model structure that provides more flexibilty with regards to family structures (e.g. zero inflated models), account for variance structures (e.g. phylogentic relatedness in `caper::pgls()`), or go bayesian (e.g. `MCMCglmm` or `brms`). Once you have a basic handle this become much more intuitive. But some things to always remember:
 
   * how operators work in a model (`+`, `*`, `:`)
   * how R treats factors by default and how this affects your interpretation of coefficients
@@ -87,7 +87,7 @@ The really nice thing is that all of these models use the same sytax and return 
 
 ## Model Diagnostics
 
-R is really powerful for lot so f types of modelling, but =as with many of the data wrangling techniques we learned earlier R sort will not necessarily tell you in you are doing something wrong. In particular it's really important to pay attention to model assumptions and diagnostics to make sure you are performing the correct analyses and interpreting output correctly. A really important step that we often negelct are mode diagnostics. R has lots of functions for this in base R and there are even newer packages such as `performance` which optimize this process.
+R is really powerful for lot so of types of modelling, but as with many of the data wrangling techniques we learned earlier R sort will not necessarily tell you in you are doing something wrong. In particular it's really important to pay attention to model assumptions and diagnostics to make sure you are performing the correct analyses and interpreting output correctly. A really important step that we often neglect are mode diagnostics. R has lots of functions for this in base R and there are even newer packages such as `performance` which optimize this process.
 
 Some common things we look for in R model diagnostics are:
 
@@ -101,10 +101,14 @@ We will quickly go over what these diagnostics mean and how we should be looking
 First let's create a linear model using `brain.data.csv`, and let's look at `brain mass` as a function of `body mass`:
 
 ```{r}
+bd <- read.csv("Data/brain.data.csv")
 
 #run simple glm
-mod <- lm(brain.mass ~ body.mass, data=bd)
+mod <- glm(log10(brain.mass) ~ log10(body.mass), data=bd)
 summary(mod)
+
+plot(mod)
+plot(log10(brain.mass) ~ log10(body.mass), data=bd)
 ```
 
 
@@ -117,19 +121,19 @@ Let's build a few models and compare:
 
 ```{r}
 
-brain.1 <- glm(brain.mass ~ body.mass, data=bd)
+brain.1 <- glm(log10(brain.mass) ~ log10(body.mass), data=bd)
 summary(brain.1)
 
-brain.2 <- glm(brain.mass ~ body.mass + reproductive.mode, data=bd)
+brain.2 <- glm(log10(brain.mass) ~ log10(body.mass) + reproductive.mode, data=bd)
 summary(brain.2)
 
-brain.3 <- glm(brain.mass ~ body.mass + habitat, data=bd)
+brain.3 <- glm(log10(brain.mass) ~ log10(body.mass) + habitat, data=bd)
 summary(brain.3)
 
-brain.4 <- glm(brain.mass ~ body.mass + reproductive.mode + habitat, data=bd)
+brain.4 <- glm(log10(brain.mass) ~ log10(body.mass) + reproductive.mode + habitat, data=bd)
 summary(brain.4)
 
-brain.5 <- glm(brain.mass ~ body.mass * habitat, data=bd)
+brain.5 <- glm(log10(telencephalon) ~ log10(body.mass) * habitat, data=bd)
 summary(brain.5)
 
 AIC(brain.1, brain.2, brain.3, brain.4, brain.5)
@@ -148,8 +152,15 @@ Using the `mtcars` data fit a few models of `mpg` over `cyl`, `hp`, and `vs` and
 
 ```{r}
 
+plot(mpg~cyl, data=mtcars)
+plot(mpg~hp, data = mtcars)
 
+cars.model <- glm(mpg ~ cyl*hp, data=mtcars)
+summary(cars.model)
 
+df <- mtcars
+df$vs <- as.factor(df$vs)
+glm(mpg~vs, data = mtcars)
 ```
 
 
